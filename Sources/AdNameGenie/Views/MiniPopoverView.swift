@@ -236,22 +236,16 @@ struct MiniPopoverView: View {
 
                     // Date
                     miniSection("Date") {
-                        HStack {
+                        VStack(alignment: .leading, spacing: 6) {
                             DatePicker("", selection: Binding(get: { form.date }, set: { form.date = $0 }), displayedComponents: .date)
                                 .datePickerStyle(.compact)
                                 .labelsHidden()
-                            Spacer()
-                            Button {
-                                withAnimation(.easeInOut(duration: 0.2)) { form.date = Date() }
-                            } label: {
-                                Text("Today")
-                                    .font(.system(size: 11, weight: .semibold, design: fun ? .rounded : .default))
-                                    .foregroundStyle(fun ? .white.opacity(0.6) : .secondary)
-                                    .padding(.horizontal, 8).padding(.vertical, 4)
-                                    .background(Capsule().fill(fun ? Color.white.opacity(0.08) : Color.primary.opacity(0.04)))
-                                    .overlay(Capsule().stroke(fun ? Color.white.opacity(0.1) : Color.primary.opacity(0.08)))
+                            HStack(spacing: 6) {
+                                miniDateButton("Today") { form.date = Date() }
+                                miniDateButton("Tomorrow") { form.date = Calendar.current.date(byAdding: .day, value: 1, to: Date()) ?? Date() }
+                                miniDateButton("+7 days") { form.date = Calendar.current.date(byAdding: .day, value: 7, to: Date()) ?? Date() }
+                                Spacer()
                             }
-                            .buttonStyle(.plain)
                         }
                     }
 
@@ -473,6 +467,20 @@ struct MiniPopoverView: View {
 
     private func miniPill(_ text: String, selected: Bool, colors: [Color], action: @escaping () -> Void) -> some View {
         MiniPillButton(text: text, icon: nil, selected: selected, colors: colors, action: action)
+    }
+
+    private func miniDateButton(_ label: String, action: @escaping () -> Void) -> some View {
+        Button {
+            withAnimation(.easeInOut(duration: 0.2)) { action() }
+        } label: {
+            Text(label)
+                .font(.system(size: 11, weight: .semibold, design: fun ? .rounded : .default))
+                .foregroundStyle(fun ? .white.opacity(0.6) : .secondary)
+                .padding(.horizontal, 8).padding(.vertical, 4)
+                .background(Capsule().fill(fun ? Color.white.opacity(0.08) : Color.primary.opacity(0.04)))
+                .overlay(Capsule().stroke(fun ? Color.white.opacity(0.1) : Color.primary.opacity(0.08)))
+        }
+        .buttonStyle(.plain)
     }
 }
 

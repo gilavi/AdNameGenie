@@ -134,10 +134,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',system-ui,san
   <!-- Header -->
   <div class="header">
     <h1><span>&#x2728;</span> NameCraft</h1>
-    <a href="NameCraft-1.0.0.dmg" class="dl-btn" onclick="showDownloadGuide(event)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-      Download macOS App
-    </a>
+    <div style="display:flex;align-items:center;gap:8px">
+      <button class="dl-btn" onclick="clearAll()" style="cursor:pointer;opacity:0.7" title="Reset all fields">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        Clear All
+      </button>
+      <a href="NameCraft-1.0.0.dmg" class="dl-btn" onclick="showDownloadGuide(event)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        Download macOS App
+      </a>
+    </div>
   </div>
 
   <!-- 1. Brand -->
@@ -202,6 +208,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',system-ui,san
       <div class="inline-row" style="align-items:center">
         <div class="input-wrap"><input type="date" id="dateInput"></div>
         <button class="lang-pill" onclick="setToday()" style="flex:0 0 auto">Today</button>
+        <button class="lang-pill" onclick="setTomorrow()" style="flex:0 0 auto">Tomorrow</button>
+        <button class="lang-pill" onclick="setPlus7()" style="flex:0 0 auto">+7 days</button>
       </div>
     </div>
   </div>
@@ -366,6 +374,23 @@ function toggleOtherLang(){state.useOtherLang=!state.useOtherLang;document.getEl
 function selectResolution(v){if(v==="__other__"){state.useOtherRes=true;state.resolution=""}else{state.useOtherRes=false;state.resolution=v;state.customResolution=""}renderResolution();update()}
 function changeVar(d){state.variation=Math.max(1,state.variation+d);document.getElementById("varVal").textContent="v"+state.variation;document.getElementById("varMinus").disabled=state.variation<=1;update()}
 function setToday(){state.date=new Date();document.getElementById("dateInput").valueAsDate=new Date();update()}
+function setTomorrow(){var d=new Date();d.setDate(d.getDate()+1);state.date=d;document.getElementById("dateInput").valueAsDate=d;update()}
+function setPlus7(){var d=new Date();d.setDate(d.getDate()+7);state.date=d;document.getElementById("dateInput").valueAsDate=d;update()}
+function clearAll(){
+  state={brand:null,type:"vid",task:"",variation:1,platform:null,funnel:"",customFunnel:"",useOtherFunnel:false,additionalInfo:"",language:"EN",customLanguage:"",useOtherLang:false,date:new Date(),producer:"",customProducer:"",resolution:"",customResolution:"",useOtherRes:false};
+  document.getElementById("taskNumber").value="";
+  document.getElementById("dateInput").valueAsDate=new Date();
+  document.getElementById("additionalInfo").value="";
+  document.getElementById("infoCount").textContent="0/50";
+  document.getElementById("customLang").value="";
+  document.getElementById("langOtherField").style.display="none";
+  document.querySelectorAll("#brand-grid .pill").forEach(p=>p.classList.remove("active"));
+  document.querySelectorAll("#platform-grid .pill").forEach(p=>p.classList.remove("active"));
+  document.getElementById("varVal").textContent="v1";
+  document.getElementById("varMinus").disabled=true;
+  ["sec-platform","sec-funnel","sec-creative"].forEach(id=>document.getElementById(id).classList.add("dimmed"));
+  renderTypes();renderLanguages();renderFunnel();renderProducer();renderResolution();update();
+}
 function validateTask(){
   const h=document.getElementById("taskHint");const i=document.getElementById("taskNumber");
   if(!state.task){h.textContent="Only the number - type label added automatically";h.className="field-hint";i.classList.remove("error");return}
