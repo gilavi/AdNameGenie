@@ -793,6 +793,9 @@ struct ContentView: View {
     @State private var toggleBurst = false
     @State private var scrollTarget: NavSection?
     @AppStorage("funMode") private var funModeEnabled = false
+    @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
+    @State private var showTour = false
+    @State private var tourToggleFrame: CGRect = .zero
 
     enum Tab { case generator, history }
 
@@ -816,8 +819,18 @@ struct ContentView: View {
                 .transition(.move(edge: .bottom).combined(with: .opacity))
                 .animation(.spring(response: 0.4, dampingFraction: 0.65), value: form.showCopiedToast)
             }
+
+            if showTour {
+                OnboardingTour(isVisible: $showTour, toggleFrame: tourToggleFrame)
+                    .transition(.opacity)
+                    .zIndex(100)
+            }
         }
         .frame(minWidth: 940, minHeight: 620)
+        .coordinateSpace(name: "tourCoordinates")
+        .onPreferenceChange(ToggleFrameKey.self) { frame in
+            tourToggleFrame = frame
+        }
         .environment(\.funMode, funModeEnabled)
         .animation(.easeInOut(duration: 0.3), value: funModeEnabled)
         .onAppear {
@@ -826,6 +839,14 @@ struct ContentView: View {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                 NSApp.keyWindow?.makeFirstResponder(nil)
             }
+            if !hasSeenOnboarding {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.9) {
+                    withAnimation(.easeIn(duration: 0.3)) { showTour = true }
+                }
+            }
+        }
+        .onChange(of: showTour) { _, newValue in
+            if !newValue { hasSeenOnboarding = true }
         }
     }
 
@@ -868,6 +889,14 @@ struct ContentView: View {
                 .controlSize(.small)
             }
             .modifier(PopBurst(trigger: $toggleBurst, emojis: ["✨","🎉","🌈","💥","⚡","💫","🎊","🥳"]))
+            .background(
+                GeometryReader { geo in
+                    Color.clear.preference(
+                        key: ToggleFrameKey.self,
+                        value: geo.frame(in: .named("tourCoordinates"))
+                    )
+                }
+            )
 
             Spacer()
 
