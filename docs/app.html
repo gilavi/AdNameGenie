@@ -45,10 +45,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',system-ui,san
 .pill-sm{padding:10px 8px;font-size:14px}
 
 /* Brand pill */
-.pill-brand .pill-icon{width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:4px}
+.pill-brand{min-height:118px;justify-content:center}
+.pill-brand .pill-icon{width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:4px;flex-shrink:0}
 .pill-brand.active .pill-icon{background:rgba(0,0,0,0.15)}
 .pill-brand .pill-name{font-size:14px}
-.pill-brand .pill-abbr{font-size:13px;font-family:monospace;opacity:.55}
+.pill-brand .pill-abbr{font-size:13px;font-family:monospace;opacity:.55;min-height:18px}
 
 /* Inline controls */
 .inline-row{display:flex;gap:10px;align-items:flex-end}
@@ -104,6 +105,39 @@ body.fun-mode .cal-drop{border-color:rgba(124,92,252,0.15)}
 .copy-btn.disabled{background:rgba(255,255,255,0.06);color:var(--dim);cursor:default}
 .copy-btn.copied{background:var(--green);color:var(--bg)}
 
+/* Producer avatar chips */
+.producer-grid{display:flex;flex-wrap:wrap;gap:12px}
+.producer-chip{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;user-select:none}
+.producer-avatar{width:54px;height:54px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;font-family:monospace;transition:all .2s cubic-bezier(.4,0,.2,1);border:2px solid transparent}
+.producer-chip:hover .producer-avatar{transform:scale(1.07) translateY(-1px)}
+.producer-chip:active .producer-avatar{transform:scale(0.93)}
+.producer-chip.active .producer-avatar{border-width:2.5px}
+.producer-name{font-size:11px;font-weight:600;color:var(--dim);transition:color .2s;max-width:64px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.producer-chip.active .producer-name{color:var(--text)}
+/* Resolution pills */
+.res-grid{display:flex;flex-direction:column;gap:6px}
+.res-pill{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:var(--radius);border:1px solid var(--border);background:rgba(255,255,255,0.03);cursor:pointer;transition:all .2s;user-select:none}
+.res-pill:hover{background:rgba(255,255,255,0.06);border-color:rgba(255,255,255,0.14)}
+.res-pill.active{background:rgba(255,255,255,0.07);border-color:rgba(255,255,255,0.28)}
+/* Aspect ratio thumbnail */
+.res-thumb{width:48px;height:44px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.res-rect{border:2px solid rgba(255,255,255,0.22);border-radius:3px;background:rgba(255,255,255,0.05);transition:all .2s}
+.res-pill.active .res-rect{border-color:rgba(255,255,255,0.7);background:rgba(255,255,255,0.12)}
+.res-pill:hover:not(.active) .res-rect{border-color:rgba(255,255,255,0.35)}
+.res-rect-916{width:17px;height:30px}
+.res-rect-11{width:26px;height:26px}
+.res-rect-169{width:38px;height:22px}
+.res-rect-45{width:22px;height:28px}
+/* Info labels */
+.res-info{flex:1;min-width:0}
+.res-dim{font-size:13px;font-weight:700;font-family:monospace;color:var(--text);letter-spacing:.3px}
+.res-name{font-size:11px;font-weight:500;color:var(--dim);margin-top:2px}
+.res-pill.active .res-name{color:rgba(255,255,255,0.55)}
+.res-pill .res-check{width:18px;height:18px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;opacity:0;transform:scale(0.5);transition:all .2s}
+.res-pill.active .res-check{opacity:1;transform:scale(1)}
+body.fun-mode .res-pill.active{background:rgba(124,92,252,0.12);border-color:rgba(124,92,252,0.4)}
+body.fun-mode .res-pill.active .res-rect{border-color:rgba(124,92,252,0.9);background:rgba(124,92,252,0.15)}
+body.fun-mode .res-pill.active .res-check{background:linear-gradient(135deg,var(--accent),#9b6dff)}
 /* Inline "Other" pill-as-input */
 .pill-input{padding:10px 16px;border-radius:var(--radius);border:1px solid var(--accent);background:rgba(124,92,252,0.1);color:var(--text);font-size:14px;font-weight:500;outline:none;min-width:80px;max-width:150px;transition:border .2s;font-family:inherit}
 .pill-input:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(124,92,252,0.15)}
@@ -446,26 +480,80 @@ function renderFunnel(){
     if(state.useOtherFunnel)setTimeout(()=>{const el=document.getElementById("funnelOtherInput");if(el)el.focus()},0);
   }else{c.innerHTML=""}
 }
+const AVATAR_COLORS=["#ef6464","#66a8ff","#d97ced","#3cd990","#f0a93a","#8b7ef5","#3de0e0","#ff6e9a"];
+const FUN_EMOJIS=["🎨","🖌️","🧑‍🎨","🦄","🌈","🎭","🎬","📸","🪄","🧙","🎸","🥳","🦸","🤹","🎵","🌟","💅","🔥","⚡","🎯","🚀","🦊"];
+function avatarColor(str){let h=0;for(const c of str)h=(h+c.charCodeAt(0))%AVATAR_COLORS.length;return AVATAR_COLORS[h]}
+function avatarEmoji(str){let h=0;for(const c of str)h=(h+c.charCodeAt(0))%FUN_EMOJIS.length;return FUN_EMOJIS[h]}
+function producerFirstName(label){return label.split(" ")[0]}
+
 function renderProducer(){
   const c=document.getElementById("producer-content");
   if(!state.brand){c.innerHTML="";return}
   const b=BRANDS.find(x=>x.key===state.brand);
+  const on=document.body.classList.contains('fun-mode');
   if(b.producers.length===0){
-    c.innerHTML=`<div class="field-group"><div class="field-label">Creative Producer</div><div class="input-wrap"><input type="text" placeholder="Initials (e.g. JD)" value="${state.customProducer}" style="text-transform:uppercase;max-width:200px" oninput="state.customProducer=this.value.toUpperCase();update()"></div></div>`;
+    const initials=state.customProducer||"?";
+    const col=avatarColor(initials);
+    const isActive=!!state.customProducer;
+    const avatarContent=on?`<span style="font-size:20px">${avatarEmoji(initials)}</span>`:`<span style="color:${isActive?'#fff':col};font-size:14px;font-weight:900;font-family:monospace">${initials.slice(0,2).toUpperCase()}</span>`;
+    c.innerHTML=`<div class="field-group"><div class="field-label">Creative Producer</div><div style="display:flex;align-items:center;gap:12px">
+      <div class="producer-avatar" style="background:${col}22;border-color:${isActive?col:'transparent'};box-shadow:${isActive?`0 0 12px ${col}55`:'none'}">${avatarContent}</div>
+      <input class="pill-input" placeholder="Initials (e.g. JD)" value="${state.customProducer}" style="text-transform:uppercase;max-width:160px;font-family:monospace;font-size:15px;font-weight:700" oninput="state.customProducer=this.value.toUpperCase().slice(0,4);this.value=state.customProducer;renderProducer();update()">
+    </div></div>`;
   }else{
-    c.innerHTML=`<div class="field-group"><div class="field-label">Creative Producer</div><div class="input-wrap"><select onchange="state.producer=this.value;update()"><option value="">Select...</option>${b.producers.map(p=>`<option value="${p.v}" ${state.producer===p.v?"selected":""}>${p.l}</option>`).join("")}</select></div></div>`;
+    const chips=b.producers.map(p=>{
+      const col=avatarColor(p.v);
+      const isSel=state.producer===p.v;
+      const avatarContent=on?`<span style="font-size:20px">${avatarEmoji(p.v)}</span>`:`<span style="color:${isSel?'#fff':col};font-size:14px;font-weight:900;font-family:monospace">${p.v}</span>`;
+      return `<div class="producer-chip${isSel?" active":""}" onclick="state.producer='${p.v}';renderProducer();update()">
+        <div class="producer-avatar" style="background:${isSel?col+'cc':col+'22'};border-color:${isSel?col:'transparent'};box-shadow:${isSel?`0 0 14px ${col}66`:'none'}">${avatarContent}</div>
+        <div class="producer-name">${producerFirstName(p.l)}</div>
+      </div>`;
+    }).join("");
+    c.innerHTML=`<div class="field-group"><div class="field-label">Creative Producer</div><div class="producer-grid">${chips}</div></div>`;
   }
+}
+
+function resThumb(v){
+  if(v.startsWith("1080x19"))return'<div class="res-rect res-rect-916"></div>';
+  if(v==="1080x1350")return'<div class="res-rect res-rect-45"></div>';
+  if(v.includes("1080x1080"))return'<div class="res-rect res-rect-11"></div>';
+  if(v.startsWith("1920x"))return'<div class="res-rect res-rect-169"></div>';
+  return'<div class="res-rect res-rect-11"></div>';
+}
+function resName(v){
+  if(v==="1080x1920")return"Stories · Reels  9:16";
+  if(v==="1080x1920_R")return"Stories (Reversed)  9:16";
+  if(v==="1080x1080")return"Square  1:1";
+  if(v==="1920x1080")return"Landscape  16:9";
+  if(v==="1080x1350")return"Portrait  4:5";
+  return"";
 }
 function renderResolution(){
   const c=document.getElementById("resolution-content");
   if(!state.brand){c.innerHTML="";return}
   const b=BRANDS.find(x=>x.key===state.brand);
-  if(state.useOtherRes){
-    c.innerHTML=`<div class="field-label">Resolution</div><div style="display:flex;align-items:center;gap:8px"><input class="pill-input" id="resOtherInput" placeholder="e.g. 1920x1080" value="${state.customResolution}" style="font-family:monospace;max-width:200px" oninput="state.customResolution=this.value;update()"><button class="lang-pill" style="padding:10px 12px;font-size:12px" onclick="selectResolution('')">&#x2190; Back</button></div>`;
-    setTimeout(()=>{const el=document.getElementById("resOtherInput");if(el)el.focus()},0);
-  }else{
-    c.innerHTML=`<div class="field-label">Resolution</div><div class="input-wrap"><select onchange="selectResolution(this.value)"><option value="">Select...</option>${b.resolutions.map(r=>`<option value="${r}" ${state.resolution===r?"selected":""}>${r}</option>`).join("")}<option value="__other__">Other...</option></select></div>`;
-  }
+  const pills=b.resolutions.map(r=>{
+    const isSel=!state.useOtherRes&&state.resolution===r;
+    const dim=r.replace("_R","");
+    return `<div class="res-pill${isSel?" active":""}" onclick="selectResolution('${r}')">
+      <div class="res-thumb">${resThumb(r)}</div>
+      <div class="res-info"><div class="res-dim">${dim}</div><div class="res-name">${resName(r)}</div></div>
+      <div class="res-check">✓</div>
+    </div>`;
+  }).join("");
+  const otherRow=state.useOtherRes
+    ?`<div class="res-pill active" style="border-color:var(--accent)" onclick="">
+        <div class="res-thumb"><div class="res-rect res-rect-11" style="border-style:dashed;opacity:0.5"></div></div>
+        <input class="pill-input" id="resOtherInput" placeholder="e.g. 1920x1080" value="${state.customResolution}" style="font-family:monospace;flex:1;background:none;border:none;padding:0" oninput="state.customResolution=this.value;update()" onclick="event.stopPropagation()">
+        <button class="lang-pill" style="padding:6px 10px;font-size:11px;flex-shrink:0" onclick="selectResolution(event,'back')">✕</button>
+      </div>`
+    :`<div class="res-pill" onclick="selectResolution(null,'other')">
+        <div class="res-thumb"><div class="res-rect res-rect-11" style="border-style:dashed;opacity:0.4"></div></div>
+        <div class="res-info"><div class="res-dim" style="color:var(--dim)">Other...</div><div class="res-name">Custom dimensions</div></div>
+      </div>`;
+  c.innerHTML=`<div class="field-label">Resolution</div><div class="res-grid">${pills}${otherRow}</div>`;
+  if(state.useOtherRes)setTimeout(()=>{const el=document.getElementById("resOtherInput");if(el)el.focus()},0);
 }
 
 // ===== ACTIONS =====
@@ -489,7 +577,12 @@ function selectFunnel(f){state.funnel=f;state.useOtherFunnel=false;state.customF
 function toggleOtherFunnel(){state.useOtherFunnel=!state.useOtherFunnel;if(!state.useOtherFunnel){state.customFunnel=""}state.funnel="";renderFunnel();update()}
 function selectLang(code){state.language=code;state.useOtherLang=false;state.customLanguage="";renderLanguages();update()}
 function toggleOtherLang(){state.useOtherLang=!state.useOtherLang;if(!state.useOtherLang){state.customLanguage="";state.language="EN"}renderLanguages();update()}
-function selectResolution(v){if(v==="__other__"){state.useOtherRes=true;state.resolution=""}else{state.useOtherRes=false;state.resolution=v;state.customResolution=""}renderResolution();update()}
+function selectResolution(v,mode){
+  if(mode==="other"){state.useOtherRes=true;state.resolution=""}
+  else if(mode==="back"){state.useOtherRes=false;state.resolution="";state.customResolution=""}
+  else{state.useOtherRes=false;state.resolution=v;state.customResolution=""}
+  renderResolution();update();
+}
 function selectVar(n){state.variation=n;state.useOtherVar=false;state.customVariation="";renderVariations();update()}
 function toggleOtherVar(){state.useOtherVar=!state.useOtherVar;if(!state.useOtherVar){state.customVariation="";state.variation=1}else{state.variation=0}renderVariations();update()}
 function renderVariations(){
@@ -625,6 +718,8 @@ function toggleFunMode(){
     if(on) el.textContent=SECTION_EMOJIS[idx]||idx;
     else el.textContent=idx;
   });
+  // Re-render producer avatars (initials ↔ emoji)
+  renderProducer();
   // Update copy button text
   updateFunUI();
   // Emoji burst on toggle ON
