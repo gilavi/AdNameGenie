@@ -30,7 +30,7 @@ struct AdNameGenieApp: App {
     @StateObject private var appUpdater = AppUpdater()
 
     var body: some Scene {
-        Window("Ad Name Genie", id: "main") {
+        Window("NameCraft", id: "main") {
             ContentView(form: form, historyStore: historyStore)
                 .environment(\.funMode, funModeEnabled)
                 .onAppear { form.restoreLastBrand() }
@@ -51,7 +51,7 @@ struct AdNameGenieApp: App {
             MiniPopoverView(form: form, historyStore: historyStore)
                 .environment(\.funMode, funModeEnabled)
         } label: {
-            Label("Ad Name Genie", systemImage: "wand.and.stars")
+            Label("NameCraft", systemImage: "wand.and.stars")
         }
         .menuBarExtraStyle(.window)
     }

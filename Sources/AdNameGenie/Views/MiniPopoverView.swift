@@ -15,7 +15,7 @@ struct MiniPopoverView: View {
             // Header
             HStack(spacing: 6) {
                 if fun { Text("✨").font(.system(size: 11)) }
-                Text("Ad Name Genie")
+                Text("NameCraft")
                     .font(.system(size: 12, weight: .bold, design: fun ? .rounded : .default))
                 Spacer()
                 modeToggleButton

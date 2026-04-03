@@ -835,7 +835,7 @@ struct ContentView: View {
         HStack(spacing: 14) {
             HStack(spacing: 6) {
                 if funModeEnabled { Text("✨").font(.system(size: 14)) }
-                Text("Ad Name Genie")
+                Text("NameCraft")
                     .font(.system(size: 14, weight: .bold, design: funModeEnabled ? .rounded : .default))
                 Text("Internal")
                     .font(.system(size: 10, weight: .semibold))

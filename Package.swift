@@ -11,7 +11,8 @@ let package = Package(
         .executableTarget(
             name: "AdNameGenie",
             dependencies: ["Sparkle"],
-            path: "Sources/AdNameGenie"
+            path: "Sources/AdNameGenie",
+            resources: [.copy("Resources")]
         )
     ]
 )
