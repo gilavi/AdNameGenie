@@ -96,6 +96,37 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',system-ui,san
 .info-row{display:flex;align-items:center;gap:8px}
 .info-row input{flex:1}
 .char-count{font-size:11px;font-family:monospace;color:rgba(255,255,255,0.3);white-space:nowrap}
+
+/* Download modal */
+.dl-modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.72);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:200;display:flex;align-items:flex-end;justify-content:center;padding:0 16px 24px;opacity:0;pointer-events:none;transition:opacity .25s}
+.dl-modal-bg.visible{opacity:1;pointer-events:all}
+.dl-modal{background:#13101e;border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:28px;width:100%;max-width:520px;transform:translateY(24px);transition:transform .3s cubic-bezier(.2,.8,.4,1);box-shadow:0 -4px 40px rgba(0,0,0,0.5)}
+.dl-modal-bg.visible .dl-modal{transform:translateY(0)}
+.dl-modal-top{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.dl-check{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#34d399,#059669);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.dl-check svg{width:18px;height:18px;color:white}
+.dl-modal-top h2{font-size:16px;font-weight:700;flex:1}
+.dl-modal-top .dl-close{background:rgba(255,255,255,0.06);border:none;color:rgba(255,255,255,0.5);width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:background .15s;flex-shrink:0}
+.dl-modal-top .dl-close:hover{background:rgba(255,255,255,0.12);color:white}
+.dl-warn{display:flex;gap:10px;background:rgba(251,146,60,0.08);border:1px solid rgba(251,146,60,0.2);border-radius:12px;padding:14px;margin-bottom:16px}
+.dl-warn-icon{font-size:18px;flex-shrink:0;margin-top:1px}
+.dl-warn p{font-size:13px;color:rgba(255,255,255,0.7);line-height:1.5}
+.dl-warn strong{color:rgba(255,255,255,0.95)}
+.dl-steps{display:flex;flex-direction:column;gap:10px;margin-bottom:20px}
+.dl-step{display:flex;gap:12px;align-items:flex-start}
+.dl-step-num{width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,0.08);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.dl-step-body{flex:1}
+.dl-step-body strong{font-size:13px;font-weight:600;display:block;margin-bottom:3px}
+.dl-step-body span{font-size:12px;color:rgba(255,255,255,0.5)}
+.dl-cmd{display:flex;align-items:center;gap:8px;background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:10px 12px;margin-top:8px}
+.dl-cmd code{flex:1;font-family:'SF Mono','Fira Code',monospace;font-size:11px;color:#22d3ee;word-break:break-all}
+.dl-cmd button{background:rgba(255,255,255,0.06);border:none;color:rgba(255,255,255,0.6);padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .15s;flex-shrink:0}
+.dl-cmd button:hover{background:rgba(255,255,255,0.12);color:white}
+.dl-cmd button.copied-state{background:rgba(52,211,153,0.15);color:#34d399}
+.dl-divider{display:flex;align-items:center;gap:8px;margin:6px 0;color:rgba(255,255,255,0.2);font-size:11px;font-weight:600;letter-spacing:.5px}
+.dl-divider::before,.dl-divider::after{content:"";flex:1;height:1px;background:rgba(255,255,255,0.06)}
+.dl-got-it{width:100%;padding:11px;border-radius:12px;border:none;background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.7);font-size:14px;font-weight:600;cursor:pointer;transition:all .2s}
+.dl-got-it:hover{background:rgba(255,255,255,0.1);color:white}
 </style>
 </head>
 <body>
@@ -103,7 +134,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',system-ui,san
   <!-- Header -->
   <div class="header">
     <h1><span>&#x2728;</span> NameCraft</h1>
-    <a href="NameCraft-1.0.0.dmg" class="dl-btn">
+    <a href="NameCraft-1.0.0.dmg" class="dl-btn" onclick="showDownloadGuide(event)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
       Download macOS App
     </a>
@@ -180,6 +211,51 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',system-ui,san
     <div class="section-head"><div class="section-num">6</div><div class="section-title">Creative & Output</div></div>
     <div id="producer-content"></div>
     <div class="field-group" id="resolution-content" style="margin-top:16px"></div>
+  </div>
+</div>
+
+<!-- Download guide modal -->
+<div class="dl-modal-bg" id="dlModal" onclick="if(event.target===this)closeDlModal()">
+  <div class="dl-modal">
+    <div class="dl-modal-top">
+      <div class="dl-check">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <h2>Download started — one thing to know</h2>
+      <button class="dl-close" onclick="closeDlModal()">✕</button>
+    </div>
+
+    <div class="dl-warn">
+      <div class="dl-warn-icon">⚠️</div>
+      <p><strong>macOS may block the app</strong> the first time you open it, saying "Apple could not verify…". This is normal for apps distributed outside the App Store. Here's how to fix it:</p>
+    </div>
+
+    <div class="dl-steps">
+      <div class="dl-step">
+        <div class="dl-step-num">1</div>
+        <div class="dl-step-body">
+          <strong>Drag NameCraft to Applications</strong>
+          <span>Open the DMG and drag the app into your Applications folder</span>
+        </div>
+      </div>
+      <div class="dl-step">
+        <div class="dl-step-num">2</div>
+        <div class="dl-step-body">
+          <strong>Right-click the app → Open</strong>
+          <span>Don't double-click — right-click instead, choose Open, then click "Open" in the dialog</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="dl-divider">OR use Terminal (one-time)</div>
+
+    <div class="dl-cmd">
+      <code>xattr -dr com.apple.quarantine /Applications/NameCraft.app</code>
+      <button id="cmdCopyBtn" onclick="copyCmd()">Copy</button>
+    </div>
+    <p style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:6px;margin-bottom:16px">Paste this in Terminal after installing. After that it opens normally, no warnings ever again.</p>
+
+    <button class="dl-got-it" onclick="closeDlModal()">Got it</button>
   </div>
 </div>
 
@@ -332,6 +408,25 @@ function copyFilename(){
     const btn=document.getElementById("copyBtn");
     btn.className="copy-btn copied";btn.textContent="Copied!";
     setTimeout(()=>{btn.className="copy-btn ready";btn.textContent="Copy"},1500);
+  });
+}
+
+// ===== DOWNLOAD GUIDE =====
+function showDownloadGuide(e){
+  // Let the browser follow the href (starts the download), then show the modal
+  setTimeout(()=>{
+    document.getElementById('dlModal').classList.add('visible');
+  }, 300);
+}
+function closeDlModal(){
+  document.getElementById('dlModal').classList.remove('visible');
+}
+function copyCmd(){
+  const cmd='xattr -dr com.apple.quarantine /Applications/NameCraft.app';
+  navigator.clipboard.writeText(cmd).then(()=>{
+    const btn=document.getElementById('cmdCopyBtn');
+    btn.textContent='Copied!';btn.classList.add('copied-state');
+    setTimeout(()=>{btn.textContent='Copy';btn.classList.remove('copied-state')},2000);
   });
 }
 
