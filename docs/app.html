@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ad Name Genie</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0a0812;--surface:#13101e;--card:#1a1528;--border:rgba(255,255,255,0.06);--text:#f0eef5;--dim:rgba(255,255,255,0.45);--accent:#7c5cfc;--green:#34d399;--pink:#f472b6;--cyan:#22d3ee;--orange:#fb923c;--radius:12px}
+body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',system-ui,sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;min-height:100vh}
+.app{max-width:760px;margin:0 auto;padding:20px 24px 100px}
+
+/* Header */
+.header{display:flex;align-items:center;justify-content:space-between;padding:16px 0 20px;border-bottom:1px solid var(--border);margin-bottom:24px}
+.header h1{font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px}
+.header h1 span{font-size:20px}
+.dl-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:10px;font-size:13px;font-weight:600;text-decoration:none;color:var(--text);background:rgba(255,255,255,0.06);border:1px solid var(--border);transition:all .2s}
+.dl-btn:hover{background:rgba(255,255,255,0.1);transform:translateY(-1px)}
+.dl-btn svg{width:14px;height:14px}
+
+/* Section */
+.section{margin-bottom:28px}
+.section-head{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.section-num{width:27px;height:27px;border-radius:50%;background:var(--text);color:var(--bg);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.section-title{font-size:16px;font-weight:700}
+.field-label{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--dim);margin-bottom:8px}
+.field-group{margin-bottom:16px}
+.field-hint{font-size:13px;color:rgba(255,255,255,0.3);margin-top:4px}
+.field-error{font-size:13px;color:#ef4444;margin-top:4px}
+.badge{font-size:12px;font-weight:500;color:var(--dim);padding:2px 8px;background:rgba(255,255,255,0.04);border-radius:20px;margin-left:6px}
+
+/* Pill grid */
+.pill-grid{display:grid;gap:8px}
+.pill-grid.cols-5{grid-template-columns:repeat(5,1fr)}
+.pill-grid.cols-4{grid-template-columns:repeat(4,1fr)}
+.pill-grid.cols-2{grid-template-columns:repeat(2,1fr)}
+@media(max-width:600px){.pill-grid.cols-5{grid-template-columns:repeat(3,1fr)}.pill-grid.cols-4{grid-template-columns:repeat(3,1fr)}}
+
+/* Pill button */
+.pill{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:14px 8px;border-radius:var(--radius);border:1px solid var(--border);background:rgba(255,255,255,0.03);cursor:pointer;transition:all .2s;font-size:15px;font-weight:500;color:var(--text);text-align:center;user-select:none}
+.pill:hover{background:rgba(255,255,255,0.07);border-color:rgba(255,255,255,0.14);transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,0.2)}
+.pill.active{background:var(--text);color:var(--bg);border-color:transparent;font-weight:700;box-shadow:0 4px 16px rgba(0,0,0,0.3)}
+.pill .pill-icon{font-size:20px;margin-bottom:2px}
+.pill .pill-abbr{font-size:13px;opacity:.55;font-family:monospace}
+.pill-sm{padding:10px 8px;font-size:14px}
+
+/* Brand pill */
+.pill-brand .pill-icon{width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:4px}
+.pill-brand.active .pill-icon{background:rgba(0,0,0,0.15)}
+.pill-brand .pill-name{font-size:14px}
+.pill-brand .pill-abbr{font-size:13px;font-family:monospace;opacity:.55}
+
+/* Inline controls */
+.inline-row{display:flex;gap:10px;align-items:flex-end}
+.inline-row>*{flex:1}
+.input-wrap{position:relative}
+.input-wrap input,.input-wrap select{width:100%;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px;font-size:15px;font-weight:600;color:var(--text);font-family:monospace;outline:none;transition:border .2s}
+.input-wrap input:focus,.input-wrap select:focus{border-color:rgba(255,255,255,0.2)}
+.input-wrap input.error{border-color:rgba(239,68,68,0.4)}
+.input-wrap select{-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='rgba(255,255,255,0.4)' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;cursor:pointer}
+.input-wrap select option{background:#1a1528;color:var(--text)}
+
+/* Stepper */
+.stepper{display:flex;align-items:center;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.stepper button{width:44px;height:44px;border:none;background:none;color:var(--text);font-size:16px;font-weight:700;cursor:pointer;transition:background .15s}
+.stepper button:hover{background:rgba(255,255,255,0.06)}
+.stepper button:disabled{opacity:.25;cursor:default}
+.stepper .val{min-width:44px;text-align:center;font-size:16px;font-weight:700;font-family:monospace}
+
+/* Language row */
+.lang-row{display:flex;gap:6px;flex-wrap:wrap}
+.lang-pill{padding:10px 16px;border-radius:var(--radius);border:1px solid var(--border);background:rgba(255,255,255,0.03);cursor:pointer;transition:all .2s;font-size:14px;font-weight:500;user-select:none;white-space:nowrap}
+.lang-pill:hover{background:rgba(255,255,255,0.07);border-color:rgba(255,255,255,0.14)}
+.lang-pill.active{background:var(--text);color:var(--bg);border-color:transparent;font-weight:700}
+
+/* Dimmed sections */
+.dimmed{opacity:.35;pointer-events:none}
+.dimmed .section-head{opacity:.7}
+
+/* Preview */
+.preview-bar{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);padding:16px 24px;z-index:100;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+.preview-inner{max-width:760px;margin:0 auto;display:flex;align-items:center;gap:12px}
+.preview-text{flex:1;font-family:'SF Mono','Fira Code',monospace;font-size:13px;font-weight:500;color:var(--cyan);padding:10px 14px;background:rgba(34,211,238,0.08);border:1px solid rgba(34,211,238,0.15);border-radius:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-height:40px;display:flex;align-items:center}
+.preview-text.empty{color:var(--dim);background:rgba(255,255,255,0.03);border-color:var(--border)}
+.copy-btn{padding:10px 24px;border-radius:12px;border:none;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap;display:flex;align-items:center;gap:6px}
+.copy-btn.ready{background:linear-gradient(135deg,var(--accent),#9b6dff);color:white;box-shadow:0 4px 16px rgba(124,92,252,0.3)}
+.copy-btn.ready:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(124,92,252,0.4)}
+.copy-btn.disabled{background:rgba(255,255,255,0.06);color:var(--dim);cursor:default}
+.copy-btn.copied{background:var(--green);color:var(--bg)}
+
+/* Conditional field */
+.cond-field{margin-top:8px}
+.cond-field input{width:100%;max-width:200px}
+
+/* Info counter */
+.info-row{display:flex;align-items:center;gap:8px}
+.info-row input{flex:1}
+.char-count{font-size:11px;font-family:monospace;color:rgba(255,255,255,0.3);white-space:nowrap}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- Header -->
+  <div class="header">
+    <h1><span>&#x2728;</span> Ad Name Genie</h1>
+    <a href="AdNameGenie-1.0.0.dmg" class="dl-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+      Download macOS App
+    </a>
+  </div>
+
+  <!-- 1. Brand -->
+  <div class="section" id="sec-brand">
+    <div class="section-head"><div class="section-num">1</div><div class="section-title">Brand</div></div>
+    <div class="pill-grid cols-5" id="brand-grid"></div>
+  </div>
+
+  <!-- 2. Type & Task -->
+  <div class="section" id="sec-type">
+    <div class="section-head"><div class="section-num">2</div><div class="section-title">Type & Task</div></div>
+    <div class="field-group">
+      <div class="field-label">Type Label</div>
+      <div class="pill-grid cols-2" id="type-grid"></div>
+    </div>
+    <div class="inline-row">
+      <div class="field-group">
+        <div class="field-label">Task Number <span style="color:#ef4444;font-size:11px;font-weight:500">required</span></div>
+        <div class="input-wrap"><input type="text" id="taskNumber" placeholder="Enter task number..." maxlength="6" inputmode="numeric"></div>
+        <div class="field-hint" id="taskHint">Only the number - type label added automatically</div>
+      </div>
+      <div class="field-group" style="flex:0 0 auto;min-width:140px">
+        <div class="field-label">Variation</div>
+        <div class="stepper">
+          <button id="varMinus" onclick="changeVar(-1)">-</button>
+          <div class="val" id="varVal">v1</div>
+          <button onclick="changeVar(1)">+</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Platform (dimmed until brand) -->
+  <div class="section dimmed" id="sec-platform">
+    <div class="section-head"><div class="section-num">3</div><div class="section-title">Platform</div></div>
+    <div class="pill-grid cols-4" id="platform-grid"></div>
+  </div>
+
+  <!-- 4. Funnel & Info -->
+  <div class="section dimmed" id="sec-funnel">
+    <div class="section-head"><div class="section-num">4</div><div class="section-title">Funnel & Info</div></div>
+    <div id="funnel-content"></div>
+    <div class="field-group" style="margin-top:16px">
+      <div class="field-label">Additional Info <span class="badge">optional</span> <span class="char-count" id="infoCount">0/50</span></div>
+      <div class="input-wrap"><input type="text" id="additionalInfo" placeholder="CI / SC / CT / C1650 ..." maxlength="50"></div>
+      <div class="field-hint" id="infoHint">Skipped in filename if left empty</div>
+    </div>
+  </div>
+
+  <!-- 5. Language & Date -->
+  <div class="section" id="sec-lang">
+    <div class="section-head"><div class="section-num">5</div><div class="section-title">Language & Date</div></div>
+    <div class="field-group">
+      <div class="field-label">Language</div>
+      <div class="lang-row" id="lang-row"></div>
+      <div class="cond-field" id="langOtherField" style="display:none">
+        <div class="input-wrap"><input type="text" id="customLang" placeholder="e.g. PT" maxlength="4" style="max-width:100px;text-transform:uppercase"></div>
+      </div>
+    </div>
+    <div class="field-group">
+      <div class="field-label">Date</div>
+      <div class="inline-row" style="align-items:center">
+        <div class="input-wrap"><input type="date" id="dateInput"></div>
+        <button class="lang-pill" onclick="setToday()" style="flex:0 0 auto">Today</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. Creative & Output -->
+  <div class="section dimmed" id="sec-creative">
+    <div class="section-head"><div class="section-num">6</div><div class="section-title">Creative & Output</div></div>
+    <div id="producer-content"></div>
+    <div class="field-group" id="resolution-content" style="margin-top:16px"></div>
+  </div>
+</div>
+
+<!-- Sticky preview bar -->
+<div class="preview-bar">
+  <div class="preview-inner">
+    <div class="preview-text empty" id="previewText">Select a brand to preview</div>
+    <button class="copy-btn disabled" id="copyBtn" onclick="copyFilename()">Copy</button>
+  </div>
+</div>
+
+<script>
+// ===== DATA =====
+const BRANDS = [
+  {key:"hint",name:"Hint",abbr:"Hint",icon:"\u{1F4A1}",funnels:["SL","PL","BF","NC","AC"],producers:[{l:"Vasilisa Murasheva - VM",v:"VM"},{l:"Liza Kovalska - LK",v:"LK"},{l:"Sarah Hartland - SH",v:"SH"},{l:"Natalie Hekaliuk - NH",v:"NH"}],resolutions:["1080x1920","1080x1080","1080x1920_R"],freeText:false},
+  {key:"clarityCheck",name:"ClarityCheck",abbr:"CC",icon:"\u{1F441}",funnels:["Image","Phone","Email","all"],producers:[{l:"Oleh Makarichev - OM",v:"OM"},{l:"Mariam Khutchua - MK",v:"MK"}],resolutions:["1080x1080","1080x1350","1080x1920"],freeText:false},
+  {key:"cerebrum",name:"Cerebrum",abbr:"CR",icon:"\u{1F9E0}",funnels:["IQ","personality","love"],producers:[{l:"Anastasiia Yanhol - AY",v:"AY"},{l:"Elena Castilla - EC",v:"EC"},{l:"Din Musaiev - DM",v:"DM"},{l:"Nataliia Bielousova - NB",v:"NB"}],resolutions:["1080x1920","1080x1080","1920x1080"],freeText:false},
+  {key:"vb",name:"VB",abbr:"VB",icon:"\u{1FA84}",funnels:[],producers:[],resolutions:["1080x1920","1080x1080","1920x1080"],freeText:true},
+  {key:"useAI",name:"UseAI",abbr:"AI",icon:"\u2728",funnels:[],producers:[{l:"Melike Su Uzun - MU",v:"MU"},{l:"Josef Roditi - JR",v:"JR"},{l:"Gleb Torubarov - GT",v:"GT"}],resolutions:["1080x1920","1080x1080","1920x1080"],freeText:true},
+  {key:"masterly",name:"Masterly",abbr:"MR",icon:"\u2601\uFE0F",funnels:[],producers:[{l:"Tudor Sorea - TS",v:"TS"}],resolutions:["1080x1920","1080x1080","1920x1080"],freeText:true},
+  {key:"zendocs",name:"Zendocs",abbr:"ZD",icon:"\u{1F4C4}",funnels:[],producers:[],resolutions:["1080x1920","1080x1080","1920x1080"],freeText:true},
+  {key:"sagaBox",name:"SagaBox",abbr:"SB",icon:"\u{1F4DA}",funnels:[],producers:[{l:"Francisco Garcia - FG",v:"FG"}],resolutions:["1080x1920","1080x1080","1920x1080"],freeText:true},
+  {key:"getQR",name:"GetQR",abbr:"QR",icon:"\u{1F4F1}",funnels:[],producers:[{l:"Liza Kovalska - LK",v:"LK"},{l:"Sarah Hartland - SH",v:"SH"}],resolutions:["1080x1920","1080x1080","1920x1080"],freeText:true},
+  {key:"jobAssist",name:"JobAssist",abbr:"JA",icon:"\u{1F3E2}",funnels:[],producers:[{l:"Anastasiia Yanhol - AY",v:"AY"},{l:"Din Musaiev - DM",v:"DM"},{l:"Andrei Vialichka - AV",v:"AV"}],resolutions:["1080x1920","1080x1080","1920x1080"],freeText:true}
+];
+const PLATFORMS=["FB","GL","QU","TT","OB","NB","SP","SF"];
+const LANGUAGES=[{code:"EN",flag:"\u{1F1EC}\u{1F1E7}"},{code:"ES",flag:"\u{1F1EA}\u{1F1F8}"},{code:"FR",flag:"\u{1F1EB}\u{1F1F7}"},{code:"DE",flag:"\u{1F1E9}\u{1F1EA}"}];
+
+// ===== STATE =====
+let state={brand:null,type:"vid",task:"",variation:1,platform:null,funnel:"",customFunnel:"",useOtherFunnel:false,additionalInfo:"",language:"EN",customLanguage:"",useOtherLang:false,date:new Date(),producer:"",customProducer:"",resolution:"",customResolution:"",useOtherRes:false};
+
+// ===== INIT =====
+function init(){
+  renderBrands();renderTypes();renderPlatforms();renderLanguages();
+  document.getElementById("dateInput").valueAsDate=new Date();
+  document.getElementById("taskNumber").addEventListener("input",e=>{state.task=e.target.value.replace(/\D/g,"").slice(0,6);e.target.value=state.task;validateTask();update()});
+  document.getElementById("additionalInfo").addEventListener("input",e=>{state.additionalInfo=e.target.value.slice(0,50);document.getElementById("infoCount").textContent=state.additionalInfo.length+"/50";update()});
+  document.getElementById("dateInput").addEventListener("change",e=>{state.date=e.target.valueAsDate||new Date();update()});
+  document.getElementById("customLang").addEventListener("input",e=>{state.customLanguage=e.target.value.toUpperCase().slice(0,4);e.target.value=state.customLanguage;update()});
+  update();
+}
+
+// ===== RENDER =====
+function renderBrands(){
+  const g=document.getElementById("brand-grid");
+  g.innerHTML=BRANDS.map(b=>`<div class="pill pill-brand" data-brand="${b.key}" onclick="selectBrand('${b.key}')"><div class="pill-icon">${b.icon}</div><div class="pill-name">${b.name}</div>${b.name!==b.abbr?`<div class="pill-abbr">${b.abbr}</div>`:""}</div>`).join("");
+}
+function renderTypes(){
+  const g=document.getElementById("type-grid");
+  g.innerHTML=["vid","img"].map(t=>`<div class="pill pill-sm ${state.type===t?"active":""}" onclick="selectType('${t}')">${t}</div>`).join("");
+}
+function renderPlatforms(){
+  const g=document.getElementById("platform-grid");
+  g.innerHTML=PLATFORMS.map(p=>`<div class="pill pill-sm" data-platform="${p}" onclick="selectPlatform('${p}')">${p}</div>`).join("");
+}
+function renderLanguages(){
+  const r=document.getElementById("lang-row");
+  r.innerHTML=LANGUAGES.map(l=>`<div class="lang-pill ${!state.useOtherLang&&state.language===l.code?"active":""}" onclick="selectLang('${l.code}')">${l.flag} ${l.code}</div>`).join("")+`<div class="lang-pill ${state.useOtherLang?"active":""}" onclick="toggleOtherLang()">Other</div>`;
+}
+function renderFunnel(){
+  const c=document.getElementById("funnel-content");
+  if(!state.brand){c.innerHTML="";return}
+  const b=BRANDS.find(x=>x.key===state.brand);
+  if(b.freeText){
+    c.innerHTML=`<div class="field-group"><div class="field-label">Funnel</div><div class="input-wrap"><input type="text" id="funnelInput" placeholder="Enter funnel name..." value="${state.customFunnel}" oninput="state.customFunnel=this.value;update()"></div></div>`;
+  }else if(b.funnels.length>0){
+    c.innerHTML=`<div class="field-group"><div class="field-label">Funnel</div><div class="pill-grid cols-${Math.min(b.funnels.length+1,4)}">${b.funnels.map(f=>`<div class="pill pill-sm ${!state.useOtherFunnel&&state.funnel===f?"active":""}" onclick="selectFunnel('${f}')">${f}</div>`).join("")}<div class="pill pill-sm ${state.useOtherFunnel?"active":""}" onclick="toggleOtherFunnel()">Other</div></div>${state.useOtherFunnel?`<div class="cond-field"><div class="input-wrap"><input type="text" placeholder="Custom funnel..." value="${state.customFunnel}" oninput="state.customFunnel=this.value;update()"></div></div>`:""}</div>`;
+  }else{c.innerHTML=""}
+}
+function renderProducer(){
+  const c=document.getElementById("producer-content");
+  if(!state.brand){c.innerHTML="";return}
+  const b=BRANDS.find(x=>x.key===state.brand);
+  if(b.producers.length===0){
+    c.innerHTML=`<div class="field-group"><div class="field-label">Creative Producer</div><div class="input-wrap"><input type="text" placeholder="Initials (e.g. JD)" value="${state.customProducer}" style="text-transform:uppercase;max-width:200px" oninput="state.customProducer=this.value.toUpperCase();update()"></div></div>`;
+  }else{
+    c.innerHTML=`<div class="field-group"><div class="field-label">Creative Producer</div><div class="input-wrap"><select onchange="state.producer=this.value;update()"><option value="">Select...</option>${b.producers.map(p=>`<option value="${p.v}" ${state.producer===p.v?"selected":""}>${p.l}</option>`).join("")}</select></div></div>`;
+  }
+}
+function renderResolution(){
+  const c=document.getElementById("resolution-content");
+  if(!state.brand){c.innerHTML="";return}
+  const b=BRANDS.find(x=>x.key===state.brand);
+  c.innerHTML=`<div class="field-label">Resolution</div><div class="input-wrap"><select onchange="selectResolution(this.value)"><option value="">Select...</option>${b.resolutions.map(r=>`<option value="${r}" ${!state.useOtherRes&&state.resolution===r?"selected":""}>${r}</option>`).join("")}<option value="__other__" ${state.useOtherRes?"selected":""}>Other...</option></select></div>${state.useOtherRes?`<div class="cond-field"><div class="input-wrap"><input type="text" placeholder="e.g. 1920x1080" value="${state.customResolution}" style="font-family:monospace;max-width:200px" oninput="state.customResolution=this.value;update()"></div></div>`:""}`;
+}
+
+// ===== ACTIONS =====
+function selectBrand(key){
+  state.brand=key;
+  const b=BRANDS.find(x=>x.key===key);
+  state.funnel=b.funnels[0]||"";state.customFunnel="";state.useOtherFunnel=false;
+  state.producer=b.producers[0]?.v||"";state.customProducer="";
+  state.resolution=b.resolutions[0]||"";state.customResolution="";state.useOtherRes=false;
+  document.querySelectorAll("#brand-grid .pill").forEach(p=>p.classList.toggle("active",p.dataset.brand===key));
+  ["sec-platform","sec-funnel","sec-creative"].forEach(id=>document.getElementById(id).classList.remove("dimmed"));
+  renderFunnel();renderProducer();renderResolution();update();
+}
+function selectType(t){state.type=t;renderTypes();update()}
+function selectPlatform(p){
+  state.platform=p;
+  document.querySelectorAll("#platform-grid .pill").forEach(el=>el.classList.toggle("active",el.dataset.platform===p));
+  update();
+}
+function selectFunnel(f){state.funnel=f;state.useOtherFunnel=false;state.customFunnel="";renderFunnel();update()}
+function toggleOtherFunnel(){state.useOtherFunnel=!state.useOtherFunnel;if(!state.useOtherFunnel){state.customFunnel=""}state.funnel="";renderFunnel();update()}
+function selectLang(code){state.language=code;state.useOtherLang=false;state.customLanguage="";document.getElementById("langOtherField").style.display="none";renderLanguages();update()}
+function toggleOtherLang(){state.useOtherLang=!state.useOtherLang;document.getElementById("langOtherField").style.display=state.useOtherLang?"block":"none";if(!state.useOtherLang){state.customLanguage="";state.language="EN"}renderLanguages();update()}
+function selectResolution(v){if(v==="__other__"){state.useOtherRes=true;state.resolution=""}else{state.useOtherRes=false;state.resolution=v;state.customResolution=""}renderResolution();update()}
+function changeVar(d){state.variation=Math.max(1,state.variation+d);document.getElementById("varVal").textContent="v"+state.variation;document.getElementById("varMinus").disabled=state.variation<=1;update()}
+function setToday(){state.date=new Date();document.getElementById("dateInput").valueAsDate=new Date();update()}
+function validateTask(){
+  const h=document.getElementById("taskHint");const i=document.getElementById("taskNumber");
+  if(!state.task){h.textContent="Only the number - type label added automatically";h.className="field-hint";i.classList.remove("error");return}
+  if(/\D/.test(state.task)){h.textContent="Task number must contain only digits";h.className="field-error";i.classList.add("error");return}
+  h.textContent="Only the number - type label added automatically";h.className="field-hint";i.classList.remove("error");
+}
+
+// ===== FILENAME GENERATION =====
+function generateFilename(){
+  if(!state.brand)return"";
+  const b=BRANDS.find(x=>x.key===state.brand);
+  const dd=String(state.date.getDate()).padStart(2,"0");
+  const mm=String(state.date.getMonth()+1).padStart(2,"0");
+  const yyyy=state.date.getFullYear();
+  const dateStr=`${dd}-${mm}-${yyyy}`;
+  const typeTask=state.type+(state.task||"");
+  const variation="v"+state.variation;
+  const platform=state.platform||"";
+  const funnel=b.freeText||state.useOtherFunnel?state.customFunnel:state.funnel;
+  const info=state.additionalInfo.replace(/[/\\:*?"<>|]/g,"_").trim();
+  const lang=state.useOtherLang?state.customLanguage:state.language;
+  const producer=b.producers.length===0?state.customProducer:state.producer;
+  const resolution=state.useOtherRes?state.customResolution:state.resolution;
+  return[b.abbr,typeTask,variation,platform,funnel,info,lang,dateStr,producer,resolution].filter(p=>p&&p.trim()).join("_");
+}
+
+// ===== UPDATE =====
+function update(){
+  const fn=generateFilename();
+  const el=document.getElementById("previewText");
+  const btn=document.getElementById("copyBtn");
+  if(fn){el.textContent=fn;el.classList.remove("empty");btn.className="copy-btn ready";btn.textContent="Copy"}
+  else{el.textContent="Select a brand to preview";el.classList.add("empty");btn.className="copy-btn disabled";btn.textContent="Copy"}
+}
+
+// ===== COPY =====
+function copyFilename(){
+  const fn=generateFilename();if(!fn)return;
+  navigator.clipboard.writeText(fn).then(()=>{
+    const btn=document.getElementById("copyBtn");
+    btn.className="copy-btn copied";btn.textContent="Copied!";
+    setTimeout(()=>{btn.className="copy-btn ready";btn.textContent="Copy"},1500);
+  });
+}
+
+init();
+</script>
+</body>
+</html>
