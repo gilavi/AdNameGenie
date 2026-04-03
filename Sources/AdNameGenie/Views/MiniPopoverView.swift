@@ -9,6 +9,7 @@ struct MiniPopoverView: View {
     @State private var copyPressing = false
     @State private var toggleWiggle = false
     @State private var toggleBurst = false
+    @State private var calViewDate = Date()
 
     var body: some View {
         VStack(spacing: 0) {
@@ -175,32 +176,18 @@ struct MiniPopoverView: View {
                         }
                     } else if !config.funnels.isEmpty {
                         miniSection("Funnel") {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Picker(selection: Binding(
+                            MiniDropdown(
+                                options: config.funnels.map { MiniDropdownOption(label: $0, value: $0) },
+                                selection: Binding(
                                     get: { form.useOtherFunnel ? "__other__" : form.funnel },
                                     set: { val in
-                                        if val == "__other__" {
-                                            form.useOtherFunnel = true; form.funnel = ""
-                                        } else {
-                                            form.useOtherFunnel = false; form.funnel = val; form.customFunnel = ""
-                                        }
+                                        if val == "__other__" { form.useOtherFunnel = true; form.funnel = "" }
+                                        else { form.useOtherFunnel = false; form.funnel = val; form.customFunnel = "" }
                                     }
-                                ), label: EmptyView()) {
-                                    Text("Select...").tag("")
-                                    ForEach(config.funnels, id: \.self) { f in Text(f).tag(f) }
-                                    Divider()
-                                    Text("Other...").tag("__other__")
-                                }
-                                .pickerStyle(.menu)
-                                if form.useOtherFunnel {
-                                    TextField("Custom funnel", text: Binding(get: { form.customFunnel }, set: { form.customFunnel = $0 }))
-                                        .textFieldStyle(.plain)
-                                        .font(.system(size: 12, weight: .medium))
-                                        .padding(.horizontal, 8).padding(.vertical, 6)
-                                        .background(RoundedRectangle(cornerRadius: DS.funRadius).fill(fun ? Color(white: 0.14) : Color.primary.opacity(0.05)))
-                                        .overlay(RoundedRectangle(cornerRadius: DS.funRadius).strokeBorder(fun ? Color.white.opacity(0.12) : Color.primary.opacity(0.12)))
-                                }
-                            }
+                                ),
+                                placeholder: "Select funnel...",
+                                customValue: form.useOtherFunnel ? Binding(get: { form.customFunnel }, set: { form.customFunnel = $0 }) : nil
+                            )
                         }
                     }
 
@@ -237,15 +224,22 @@ struct MiniPopoverView: View {
                     // Date
                     miniSection("Date") {
                         VStack(alignment: .leading, spacing: 6) {
-                            DatePicker("", selection: Binding(get: { form.date }, set: { form.date = $0 }), displayedComponents: .date)
-                                .datePickerStyle(.compact)
-                                .labelsHidden()
                             HStack(spacing: 6) {
-                                miniDateButton("Today") { form.date = Date() }
-                                miniDateButton("Tomorrow") { form.date = Calendar.current.date(byAdding: .day, value: 1, to: Date()) ?? Date() }
-                                miniDateButton("+7 days") { form.date = Calendar.current.date(byAdding: .day, value: 7, to: Date()) ?? Date() }
+                                miniDateButton("Today") { form.date = Date(); calViewDate = Date() }
+                                miniDateButton("Tomorrow") {
+                                    let d = Calendar.current.date(byAdding: .day, value: 1, to: Date()) ?? Date()
+                                    form.date = d; calViewDate = d
+                                }
+                                miniDateButton("+7 days") {
+                                    let d = Calendar.current.date(byAdding: .day, value: 7, to: Date()) ?? Date()
+                                    form.date = d; calViewDate = d
+                                }
                                 Spacer()
                             }
+                            MiniCalendarView(
+                                selected: Binding(get: { form.date }, set: { form.date = $0 }),
+                                viewDate: $calViewDate
+                            )
                         }
                     }
 
@@ -266,49 +260,29 @@ struct MiniPopoverView: View {
                         }
                     } else {
                         miniSection("Producer") {
-                            Picker(selection: Binding(
-                                get: { form.creativeProducer },
-                                set: { form.creativeProducer = $0 }
-                            ), label: EmptyView()) {
-                                Text("Select...").tag("")
-                                ForEach(config.creativeProducers) { p in
-                                    Text(p.label).tag(p.value)
-                                }
-                            }
-                            .pickerStyle(.menu)
+                            MiniDropdown(
+                                options: config.creativeProducers.map { MiniDropdownOption(label: $0.label, value: $0.value) },
+                                selection: Binding(get: { form.creativeProducer }, set: { form.creativeProducer = $0 }),
+                                placeholder: "Select producer..."
+                            )
                         }
                     }
 
                     // Resolution
                     miniSection("Resolution") {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Picker(selection: Binding(
+                        MiniDropdown(
+                            options: config.resolutions.map { MiniDropdownOption(label: $0.label, value: $0.value) },
+                            selection: Binding(
                                 get: { form.useOtherResolution ? "__other__" : form.resolution },
                                 set: { val in
-                                    if val == "__other__" {
-                                        form.useOtherResolution = true; form.resolution = ""
-                                    } else {
-                                        form.useOtherResolution = false; form.resolution = val; form.customResolution = ""
-                                    }
+                                    if val == "__other__" { form.useOtherResolution = true; form.resolution = "" }
+                                    else { form.useOtherResolution = false; form.resolution = val; form.customResolution = "" }
                                 }
-                            ), label: EmptyView()) {
-                                ForEach(config.resolutions) { res in Text(res.label).tag(res.value) }
-                                Divider()
-                                Text("Other...").tag("__other__")
-                            }
-                            .pickerStyle(.menu)
-                            if form.useOtherResolution {
-                                TextField("e.g. 1920x1080", text: Binding(
-                                    get: { form.customResolution },
-                                    set: { form.customResolution = $0 }
-                                ))
-                                    .textFieldStyle(.plain)
-                                    .font(.system(size: 12, weight: .medium, design: .monospaced))
-                                    .padding(.horizontal, 8).padding(.vertical, 6)
-                                    .background(RoundedRectangle(cornerRadius: DS.funRadius).fill(fun ? Color(white: 0.14) : Color.primary.opacity(0.05)))
-                                    .overlay(RoundedRectangle(cornerRadius: DS.funRadius).strokeBorder(fun ? Color.white.opacity(0.12) : Color.primary.opacity(0.12)))
-                            }
-                        }
+                            ),
+                            placeholder: "Select resolution...",
+                            customValue: form.useOtherResolution ? Binding(get: { form.customResolution }, set: { form.customResolution = $0 }) : nil,
+                            customPlaceholder: "e.g. 1920x1080"
+                        )
                     }
                 }
             }
@@ -475,10 +449,10 @@ struct MiniPopoverView: View {
         } label: {
             Text(label)
                 .font(.system(size: 11, weight: .semibold, design: fun ? .rounded : .default))
-                .foregroundStyle(fun ? .white.opacity(0.6) : .secondary)
+                .foregroundStyle(fun ? .white.opacity(0.7) : .white.opacity(0.55))
                 .padding(.horizontal, 8).padding(.vertical, 4)
-                .background(Capsule().fill(fun ? Color.white.opacity(0.08) : Color.primary.opacity(0.04)))
-                .overlay(Capsule().stroke(fun ? Color.white.opacity(0.1) : Color.primary.opacity(0.08)))
+                .background(Capsule().fill(fun ? Color.white.opacity(0.08) : Color.white.opacity(0.06)))
+                .overlay(Capsule().stroke(fun ? Color.white.opacity(0.1) : Color.white.opacity(0.1)))
         }
         .buttonStyle(.plain)
     }
@@ -597,5 +571,222 @@ private struct MiniPillButton: View {
                 .onChanged { _ in withAnimation(.easeOut(duration: 0.06)) { pressing = true } }
                 .onEnded   { _ in withAnimation(.spring(response: 0.2, dampingFraction: 0.45)) { pressing = false } }
         )
+    }
+}
+
+// MARK: - Custom Calendar
+
+private struct MiniCalendarView: View {
+    @Binding var selected: Date
+    @Binding var viewDate: Date
+    @Environment(\.funMode) private var fun
+
+    private let cal = Calendar.current
+    private let dayNames = ["M","T","W","T","F","S","S"]
+    private let columns = Array(repeating: GridItem(.flexible(), spacing: 2), count: 7)
+
+    private var monthTitle: String {
+        let f = DateFormatter(); f.dateFormat = "MMMM yyyy"; return f.string(from: viewDate)
+    }
+
+    private var daysInGrid: [(date: Date, dayNum: Int, inMonth: Bool)] {
+        var items: [(Date, Int, Bool)] = []
+        let firstOfMonth = cal.date(from: cal.dateComponents([.year, .month], from: viewDate))!
+        let startWeekday = (cal.component(.weekday, from: firstOfMonth) + 5) % 7
+        let daysInMonth = cal.range(of: .day, in: .month, for: viewDate)!.count
+        for i in (0..<startWeekday) {
+            let d = cal.date(byAdding: .day, value: -(startWeekday - i), to: firstOfMonth)!
+            items.append((d, cal.component(.day, from: d), false))
+        }
+        for day in 1...daysInMonth {
+            let d = cal.date(byAdding: .day, value: day - 1, to: firstOfMonth)!
+            items.append((d, day, true))
+        }
+        let rem = (7 - items.count % 7) % 7
+        let afterStart = cal.date(byAdding: .day, value: daysInMonth, to: firstOfMonth)!
+        for i in 0..<rem {
+            let d = cal.date(byAdding: .day, value: i, to: afterStart)!
+            items.append((d, i + 1, false))
+        }
+        return items
+    }
+
+    var body: some View {
+        VStack(spacing: 6) {
+            HStack(spacing: 0) {
+                Button { changeMonth(-1) } label: {
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 10, weight: .semibold))
+                        .foregroundStyle(fun ? .white.opacity(0.5) : .secondary)
+                        .frame(width: 26, height: 26)
+                        .background(RoundedRectangle(cornerRadius: 7).fill(Color.primary.opacity(0.05)))
+                }.buttonStyle(.plain)
+                Spacer()
+                Text(monthTitle)
+                    .font(.system(size: 12, weight: .bold, design: fun ? .rounded : .default))
+                    .foregroundStyle(fun ? .white : .primary)
+                Spacer()
+                Button { changeMonth(1) } label: {
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 10, weight: .semibold))
+                        .foregroundStyle(fun ? .white.opacity(0.5) : .secondary)
+                        .frame(width: 26, height: 26)
+                        .background(RoundedRectangle(cornerRadius: 7).fill(Color.primary.opacity(0.05)))
+                }.buttonStyle(.plain)
+            }
+            LazyVGrid(columns: columns, spacing: 2) {
+                ForEach(dayNames.indices, id: \.self) { i in
+                    Text(dayNames[i])
+                        .font(.system(size: 10, weight: .semibold))
+                        .foregroundStyle(fun ? .white.opacity(0.28) : .secondary.opacity(0.55))
+                        .frame(maxWidth: .infinity)
+                }
+            }
+            LazyVGrid(columns: columns, spacing: 2) {
+                ForEach(Array(daysInGrid.enumerated()), id: \.offset) { _, item in
+                    let isSel = cal.isDate(item.date, inSameDayAs: selected)
+                    let isToday = cal.isDateInToday(item.date)
+                    Button {
+                        withAnimation(.spring(response: 0.2, dampingFraction: 0.7)) {
+                            selected = item.date
+                            if !item.inMonth { changeMonth(item.date > viewDate ? 1 : -1) }
+                        }
+                    } label: {
+                        Text("\(item.dayNum)")
+                            .font(.system(size: 12, weight: isSel ? .bold : .medium, design: fun ? .rounded : .default))
+                            .foregroundStyle(
+                                isSel ? .white :
+                                item.inMonth ? (fun ? .white.opacity(0.85) : .primary) :
+                                (fun ? .white.opacity(0.16) : .secondary.opacity(0.28))
+                            )
+                            .frame(maxWidth: .infinity)
+                            .aspectRatio(1, contentMode: .fit)
+                            .background {
+                                if isSel {
+                                    RoundedRectangle(cornerRadius: 7)
+                                        .fill(fun
+                                            ? LinearGradient(colors: [Color(red:0.49,green:0.36,blue:0.99), Color(red:0.61,green:0.43,blue:1.0)], startPoint: .topLeading, endPoint: .bottomTrailing)
+                                            : LinearGradient(colors: [Color.accentColor, Color.accentColor], startPoint: .top, endPoint: .bottom)
+                                        )
+                                        .shadow(color: fun ? .purple.opacity(0.45) : .accentColor.opacity(0.3), radius: 4, y: 2)
+                                } else if isToday {
+                                    RoundedRectangle(cornerRadius: 7)
+                                        .stroke(fun ? Color.purple.opacity(0.5) : Color.accentColor.opacity(0.5), lineWidth: 1)
+                                }
+                            }
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
+        .padding(10)
+        .background(RoundedRectangle(cornerRadius: 12).fill(fun ? Color(white: 0.09) : Color.primary.opacity(0.04)))
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(fun ? Color.white.opacity(0.07) : Color.primary.opacity(0.08)))
+    }
+
+    private func changeMonth(_ delta: Int) {
+        withAnimation(.spring(response: 0.28, dampingFraction: 0.72)) {
+            viewDate = Calendar.current.date(byAdding: .month, value: delta, to: viewDate) ?? viewDate
+        }
+    }
+}
+
+// MARK: - Custom Dropdown
+
+struct MiniDropdownOption: Identifiable {
+    let id = UUID()
+    let label: String
+    let value: String
+}
+
+private struct MiniDropdown: View {
+    let options: [MiniDropdownOption]
+    @Binding var selection: String
+    var placeholder: String = "Select..."
+    var customValue: Binding<String>? = nil
+    var customPlaceholder: String = "Type here..."
+    @State private var isOpen = false
+    @Environment(\.funMode) private var fun
+
+    private var selectedLabel: String {
+        options.first { $0.value == selection }?.label ?? placeholder
+    }
+    private var isOther: Bool { selection == "__other__" }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Button { withAnimation(.spring(response: 0.25, dampingFraction: 0.75)) { isOpen.toggle() } } label: {
+                HStack(spacing: 6) {
+                    Text(isOther ? "Other..." : (selection.isEmpty ? placeholder : selectedLabel))
+                        .font(.system(size: 13, weight: .medium, design: fun ? .rounded : .default))
+                        .foregroundStyle(selection.isEmpty ? (fun ? .white.opacity(0.3) : .secondary) : (fun ? .white : .primary))
+                    Spacer()
+                    Image(systemName: "chevron.down")
+                        .font(.system(size: 10, weight: .semibold))
+                        .foregroundStyle(fun ? .white.opacity(0.4) : .secondary)
+                        .rotationEffect(.degrees(isOpen ? 180 : 0))
+                        .animation(.spring(response: 0.25), value: isOpen)
+                }
+                .padding(.horizontal, 10).padding(.vertical, 9)
+                .background(RoundedRectangle(cornerRadius: DS.funRadius).fill(fun ? Color(white: 0.12) : Color.primary.opacity(0.05)))
+                .overlay(RoundedRectangle(cornerRadius: DS.funRadius).stroke(
+                    isOpen ? (fun ? Color.purple.opacity(0.5) : Color.accentColor.opacity(0.5)) : (fun ? Color.white.opacity(0.1) : Color.primary.opacity(0.12)),
+                    lineWidth: isOpen ? 1.5 : 1
+                ))
+            }
+            .buttonStyle(.plain)
+
+            if isOpen {
+                VStack(spacing: 1) {
+                    ForEach(options) { opt in
+                        optionRow(label: opt.label, value: opt.value)
+                    }
+                    Divider().padding(.horizontal, 6).padding(.vertical, 2).opacity(0.35)
+                    optionRow(label: "Other...", value: "__other__", dimmed: true)
+                }
+                .padding(4)
+                .background(RoundedRectangle(cornerRadius: DS.funRadius + 2).fill(fun ? Color(white: 0.10) : Color(.windowBackgroundColor)))
+                .overlay(RoundedRectangle(cornerRadius: DS.funRadius + 2).stroke(fun ? Color.white.opacity(0.08) : Color.primary.opacity(0.1)))
+                .shadow(color: .black.opacity(fun ? 0.4 : 0.15), radius: 10, y: 4)
+                .transition(.asymmetric(
+                    insertion: .scale(scale: 0.96, anchor: .top).combined(with: .opacity),
+                    removal: .scale(scale: 0.96, anchor: .top).combined(with: .opacity)
+                ))
+            }
+
+            if isOther, let cv = customValue {
+                TextField(customPlaceholder, text: cv)
+                    .textFieldStyle(.plain)
+                    .font(.system(size: 12, weight: .medium, design: .monospaced))
+                    .padding(.horizontal, 10).padding(.vertical, 8)
+                    .background(RoundedRectangle(cornerRadius: DS.funRadius).fill(fun ? Color(white: 0.12) : Color.primary.opacity(0.05)))
+                    .overlay(RoundedRectangle(cornerRadius: DS.funRadius).stroke(fun ? Color.purple.opacity(0.35) : Color.accentColor.opacity(0.35), lineWidth: 1))
+            }
+        }
+    }
+
+    private func optionRow(label: String, value: String, dimmed: Bool = false) -> some View {
+        let isSel = selection == value
+        return Button {
+            withAnimation(.spring(response: 0.2, dampingFraction: 0.7)) { selection = value; isOpen = false }
+        } label: {
+            HStack {
+                Text(label)
+                    .font(.system(size: 12, weight: isSel ? .semibold : .medium, design: fun ? .rounded : .default))
+                    .foregroundStyle(
+                        dimmed ? (fun ? .white.opacity(0.4) : .secondary) :
+                        (fun ? .white.opacity(isSel ? 1 : 0.78) : .primary.opacity(isSel ? 1 : 0.85))
+                    )
+                Spacer()
+                if isSel {
+                    Image(systemName: "checkmark").font(.system(size: 10, weight: .bold))
+                        .foregroundStyle(fun ? Color.purple : Color.accentColor)
+                }
+            }
+            .padding(.horizontal, 10).padding(.vertical, 7)
+            .background(isSel ? (fun ? Color.purple.opacity(0.15) : Color.accentColor.opacity(0.08)) : Color.clear)
+            .cornerRadius(8)
+        }
+        .buttonStyle(.plain)
     }
 }

@@ -54,22 +54,38 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',system-ui,san
 .inline-row{display:flex;gap:10px;align-items:flex-end}
 .inline-row>*{flex:1}
 .input-wrap{position:relative}
-.input-wrap input,.input-wrap select{width:100%;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px;font-size:15px;font-weight:600;color:var(--text);font-family:monospace;outline:none;transition:border .2s}
+.input-wrap input,.input-wrap select{width:100%;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px;font-size:15px;font-weight:600;color:var(--text);font-family:monospace;outline:none;transition:border .2s;color-scheme:dark}
 .input-wrap input:focus,.input-wrap select:focus{border-color:rgba(255,255,255,0.2)}
 .input-wrap input.error{border-color:rgba(239,68,68,0.4)}
 .input-wrap select{-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='rgba(255,255,255,0.4)' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;cursor:pointer}
 .input-wrap select option{background:#1a1528;color:var(--text)}
 
-/* Stepper */
-.stepper{display:flex;align-items:center;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
-.stepper button{width:44px;height:44px;border:none;background:none;color:var(--text);font-size:16px;font-weight:700;cursor:pointer;transition:background .15s}
-.stepper button:hover{background:rgba(255,255,255,0.06)}
-.stepper button:disabled{opacity:.25;cursor:default}
-.stepper .val{min-width:44px;text-align:center;font-size:16px;font-weight:700;font-family:monospace}
+/* Custom calendar */
+.cal-wrap{position:relative}
+.cal-trigger{display:flex;align-items:center;gap:10px;width:100%;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px;font-size:15px;font-weight:600;color:var(--text);font-family:monospace;cursor:pointer;transition:border .2s;user-select:none}
+.cal-trigger:hover{border-color:rgba(255,255,255,0.15)}
+.cal-trigger .cal-icon{margin-left:auto;opacity:.4;font-size:16px}
+.cal-drop{position:absolute;top:calc(100% + 8px);left:0;z-index:50;background:var(--surface);border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:16px;width:300px;box-shadow:0 16px 48px rgba(0,0,0,0.5);display:none}
+.cal-drop.open{display:block;animation:calIn .2s ease-out}
+@keyframes calIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.cal-header .cal-title{font-size:14px;font-weight:700}
+.cal-header button{width:28px;height:28px;border-radius:8px;border:none;background:rgba(255,255,255,0.06);color:var(--text);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.cal-header button:hover{background:rgba(255,255,255,0.12)}
+.cal-weekdays{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;margin-bottom:6px}
+.cal-weekdays span{font-size:11px;font-weight:600;color:rgba(255,255,255,0.3);padding:4px 0}
+.cal-days{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.cal-day{width:100%;aspect-ratio:1;border-radius:8px;border:none;background:none;color:var(--text);font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center}
+.cal-day:hover{background:rgba(255,255,255,0.08)}
+.cal-day.other{color:rgba(255,255,255,0.15)}
+.cal-day.today{border:1px solid rgba(124,92,252,0.4)}
+.cal-day.selected{background:var(--accent);color:white;font-weight:700;box-shadow:0 2px 10px rgba(124,92,252,0.35)}
+body.fun-mode .cal-day.selected{background:linear-gradient(135deg,var(--accent),#9b6dff);box-shadow:0 3px 0 rgba(80,40,180,0.5),0 4px 16px rgba(124,92,252,0.4)}
+body.fun-mode .cal-drop{border-color:rgba(124,92,252,0.15)}
 
 /* Language row */
 .lang-row{display:flex;gap:6px;flex-wrap:wrap}
-.lang-pill{padding:10px 16px;border-radius:var(--radius);border:1px solid var(--border);background:rgba(255,255,255,0.03);cursor:pointer;transition:all .2s;font-size:14px;font-weight:500;user-select:none;white-space:nowrap}
+.lang-pill{padding:10px 16px;border-radius:var(--radius);border:1px solid var(--border);background:rgba(255,255,255,0.03);color:var(--text);cursor:pointer;transition:all .2s;font-size:14px;font-weight:500;user-select:none;white-space:nowrap}
 .lang-pill:hover{background:rgba(255,255,255,0.07);border-color:rgba(255,255,255,0.14)}
 .lang-pill.active{background:var(--text);color:var(--bg);border-color:transparent;font-weight:700}
 
@@ -88,45 +104,122 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',system-ui,san
 .copy-btn.disabled{background:rgba(255,255,255,0.06);color:var(--dim);cursor:default}
 .copy-btn.copied{background:var(--green);color:var(--bg)}
 
-/* Conditional field */
-.cond-field{margin-top:8px}
-.cond-field input{width:100%;max-width:200px}
+/* Inline "Other" pill-as-input */
+.pill-input{padding:10px 16px;border-radius:var(--radius);border:1px solid var(--accent);background:rgba(124,92,252,0.1);color:var(--text);font-size:14px;font-weight:500;outline:none;min-width:80px;max-width:150px;transition:border .2s;font-family:inherit}
+.pill-input:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(124,92,252,0.15)}
+.pill-input::placeholder{color:rgba(255,255,255,0.25);font-weight:400}
+body.fun-mode .pill-input{border-color:gold;background:rgba(255,215,0,0.08)}
+body.fun-mode .pill-input:focus{box-shadow:0 0 0 2px rgba(255,215,0,0.1)}
 
 /* Info counter */
 .info-row{display:flex;align-items:center;gap:8px}
 .info-row input{flex:1}
 .char-count{font-size:11px;font-family:monospace;color:rgba(255,255,255,0.3);white-space:nowrap}
 
-/* Download modal */
-.dl-modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.72);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:200;display:flex;align-items:flex-end;justify-content:center;padding:0 16px 24px;opacity:0;pointer-events:none;transition:opacity .25s}
-.dl-modal-bg.visible{opacity:1;pointer-events:all}
-.dl-modal{background:#13101e;border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:28px;width:100%;max-width:520px;transform:translateY(24px);transition:transform .3s cubic-bezier(.2,.8,.4,1);box-shadow:0 -4px 40px rgba(0,0,0,0.5)}
-.dl-modal-bg.visible .dl-modal{transform:translateY(0)}
-.dl-modal-top{display:flex;align-items:center;gap:12px;margin-bottom:20px}
-.dl-check{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#34d399,#059669);display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.dl-check svg{width:18px;height:18px;color:white}
-.dl-modal-top h2{font-size:16px;font-weight:700;flex:1}
-.dl-modal-top .dl-close{background:rgba(255,255,255,0.06);border:none;color:rgba(255,255,255,0.5);width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:background .15s;flex-shrink:0}
-.dl-modal-top .dl-close:hover{background:rgba(255,255,255,0.12);color:white}
-.dl-warn{display:flex;gap:10px;background:rgba(251,146,60,0.08);border:1px solid rgba(251,146,60,0.2);border-radius:12px;padding:14px;margin-bottom:16px}
-.dl-warn-icon{font-size:18px;flex-shrink:0;margin-top:1px}
-.dl-warn p{font-size:13px;color:rgba(255,255,255,0.7);line-height:1.5}
-.dl-warn strong{color:rgba(255,255,255,0.95)}
-.dl-steps{display:flex;flex-direction:column;gap:10px;margin-bottom:20px}
-.dl-step{display:flex;gap:12px;align-items:flex-start}
-.dl-step-num{width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,0.08);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
-.dl-step-body{flex:1}
-.dl-step-body strong{font-size:13px;font-weight:600;display:block;margin-bottom:3px}
-.dl-step-body span{font-size:12px;color:rgba(255,255,255,0.5)}
+/* Download success page shared styles */
 .dl-cmd{display:flex;align-items:center;gap:8px;background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:10px 12px;margin-top:8px}
 .dl-cmd code{flex:1;font-family:'SF Mono','Fira Code',monospace;font-size:11px;color:#22d3ee;word-break:break-all}
 .dl-cmd button{background:rgba(255,255,255,0.06);border:none;color:rgba(255,255,255,0.6);padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .15s;flex-shrink:0}
 .dl-cmd button:hover{background:rgba(255,255,255,0.12);color:white}
 .dl-cmd button.copied-state{background:rgba(52,211,153,0.15);color:#34d399}
-.dl-divider{display:flex;align-items:center;gap:8px;margin:6px 0;color:rgba(255,255,255,0.2);font-size:11px;font-weight:600;letter-spacing:.5px}
-.dl-divider::before,.dl-divider::after{content:"";flex:1;height:1px;background:rgba(255,255,255,0.06)}
-.dl-got-it{width:100%;padding:11px;border-radius:12px;border:none;background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.7);font-size:14px;font-weight:600;cursor:pointer;transition:all .2s}
-.dl-got-it:hover{background:rgba(255,255,255,0.1);color:white}
+
+/* Fun mode toggle */
+.mode-toggle{display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none;padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:rgba(255,255,255,0.03);transition:all .35s cubic-bezier(.4,0,.2,1)}
+.mode-toggle:hover{background:rgba(255,255,255,0.06);transform:scale(1.04)}
+.mode-toggle.fun-active{border-color:rgba(255,215,0,0.4);background:linear-gradient(135deg,rgba(255,215,0,0.12),rgba(255,160,0,0.08));box-shadow:0 0 20px rgba(255,215,0,0.15),0 0 40px rgba(255,215,0,0.05)}
+.mode-toggle .toggle-icon{font-size:15px;transition:all .4s cubic-bezier(.4,0,.2,1);display:inline-block}
+.mode-toggle.fun-active .toggle-icon{animation:funSpin .6s cubic-bezier(.4,0,.2,1)}
+.mode-toggle .toggle-label{font-size:12px;font-weight:700;color:var(--dim);transition:all .3s}
+.mode-toggle.fun-active .toggle-label{color:gold;text-shadow:0 0 10px rgba(255,215,0,0.4)}
+.mode-switch{width:36px;height:20px;border-radius:10px;background:rgba(255,255,255,0.12);position:relative;transition:all .35s cubic-bezier(.4,0,.2,1)}
+.mode-switch::after{content:"";position:absolute;width:16px;height:16px;border-radius:50%;background:white;top:2px;left:2px;transition:all .35s cubic-bezier(.4,0,.2,1)}
+.mode-toggle.fun-active .mode-switch{background:linear-gradient(135deg,gold,#ff8c00);box-shadow:0 0 12px rgba(255,215,0,0.3)}
+.mode-toggle.fun-active .mode-switch::after{transform:translateX(16px);box-shadow:0 0 8px rgba(255,255,255,0.5)}
+@keyframes funSpin{0%{transform:rotate(0) scale(1)}50%{transform:rotate(180deg) scale(1.4)}100%{transform:rotate(360deg) scale(1)}}
+
+/* Fun mode confetti dots */
+body.fun-mode .app::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;background-image:
+  radial-gradient(circle at 8% 15%,rgba(255,100,100,0.18) 2px,transparent 2px),
+  radial-gradient(circle at 22% 35%,rgba(255,200,50,0.15) 2.5px,transparent 2.5px),
+  radial-gradient(circle at 45% 10%,rgba(100,255,200,0.14) 2px,transparent 2px),
+  radial-gradient(circle at 72% 20%,rgba(150,100,255,0.2) 3px,transparent 3px),
+  radial-gradient(circle at 88% 40%,rgba(255,150,200,0.16) 2px,transparent 2px),
+  radial-gradient(circle at 15% 65%,rgba(100,220,255,0.17) 2.5px,transparent 2.5px),
+  radial-gradient(circle at 35% 80%,rgba(255,100,100,0.14) 2px,transparent 2px),
+  radial-gradient(circle at 55% 55%,rgba(200,150,255,0.18) 2px,transparent 2px),
+  radial-gradient(circle at 78% 70%,rgba(100,255,150,0.15) 3px,transparent 3px),
+  radial-gradient(circle at 92% 85%,rgba(255,200,100,0.16) 2px,transparent 2px),
+  radial-gradient(circle at 5% 90%,rgba(255,130,200,0.12) 2px,transparent 2px),
+  radial-gradient(circle at 62% 92%,rgba(100,180,255,0.14) 2.5px,transparent 2.5px);
+  animation:confettiDrift 8s ease-in-out infinite alternate}
+@keyframes confettiDrift{0%{opacity:.7;transform:translateY(0)}100%{opacity:1;transform:translateY(-6px)}}
+
+/* Fun ambient glow blobs */
+body.fun-mode .app::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(ellipse 300px 200px at 15% 25%,rgba(124,92,252,0.12),transparent),
+    radial-gradient(ellipse 250px 180px at 80% 60%,rgba(244,114,182,0.09),transparent),
+    radial-gradient(ellipse 280px 220px at 50% 85%,rgba(34,211,238,0.08),transparent);
+  animation:ambientPulse 4s ease-in-out infinite alternate}
+@keyframes ambientPulse{0%{opacity:.6;transform:scale(1)}50%{opacity:1;transform:scale(1.05)}100%{opacity:.7;transform:scale(0.97)}}
+
+/* Fun mode body styles */
+body.fun-mode{font-family:'SF Pro Rounded',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;background:linear-gradient(180deg,#0d0918 0%,#0a0812 30%)}
+body.fun-mode .app{position:relative}
+body.fun-mode .header{border-bottom-color:rgba(124,92,252,0.2)}
+body.fun-mode .section-title{font-size:18px}
+
+/* Fun section emojis instead of numbers */
+body.fun-mode .section-num{background:none;font-size:20px;width:auto;height:auto}
+
+/* Fun pills — 3D keycap style */
+body.fun-mode .pill{border:1px solid rgba(255,255,255,0.08);background:linear-gradient(180deg,rgba(255,255,255,0.08) 0%,rgba(255,255,255,0.02) 100%);box-shadow:0 4px 0 rgba(0,0,0,0.4),0 6px 12px rgba(0,0,0,0.2);transform:translateY(0);transition:all .15s cubic-bezier(.4,0,.2,1)}
+body.fun-mode .pill:hover{transform:translateY(-2px) scale(1.04) rotateX(-3deg);box-shadow:0 6px 0 rgba(0,0,0,0.35),0 10px 20px rgba(0,0,0,0.25);border-color:rgba(124,92,252,0.3)}
+body.fun-mode .pill:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,0.4),0 2px 4px rgba(0,0,0,0.2)}
+body.fun-mode .pill.active{background:linear-gradient(135deg,var(--accent),#9b6dff);color:white;border-color:transparent;box-shadow:0 4px 0 rgba(80,40,180,0.5),0 4px 20px rgba(124,92,252,0.4)}
+body.fun-mode .pill.active:hover{box-shadow:0 6px 0 rgba(80,40,180,0.45),0 8px 28px rgba(124,92,252,0.5)}
+
+/* Fun lang-pills — same 3D */
+body.fun-mode .lang-pill{border:1px solid rgba(255,255,255,0.08);background:linear-gradient(180deg,rgba(255,255,255,0.08) 0%,rgba(255,255,255,0.02) 100%);box-shadow:0 3px 0 rgba(0,0,0,0.35),0 4px 8px rgba(0,0,0,0.15);transition:all .15s cubic-bezier(.4,0,.2,1)}
+body.fun-mode .lang-pill:hover{transform:translateY(-2px);box-shadow:0 5px 0 rgba(0,0,0,0.3),0 8px 16px rgba(0,0,0,0.2);border-color:rgba(124,92,252,0.3)}
+body.fun-mode .lang-pill:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(0,0,0,0.35)}
+body.fun-mode .lang-pill.active{background:linear-gradient(135deg,var(--accent),#9b6dff);color:white;border-color:transparent;box-shadow:0 3px 0 rgba(80,40,180,0.5),0 4px 16px rgba(124,92,252,0.35)}
+
+/* Fun inputs */
+body.fun-mode .input-wrap input,body.fun-mode .input-wrap select{background:rgba(255,255,255,0.06);border-color:rgba(255,255,255,0.1)}
+body.fun-mode .input-wrap input:focus,body.fun-mode .input-wrap select:focus{border-color:rgba(255,215,0,0.4);box-shadow:0 0 12px rgba(255,215,0,0.1)}
+
+/* Fun copy button — green keycap */
+body.fun-mode .copy-btn.ready{background:linear-gradient(135deg,#34d399,#059669);box-shadow:0 4px 0 rgba(0,80,50,0.5),0 4px 20px rgba(52,211,153,0.35);transform:translateY(0)}
+body.fun-mode .copy-btn.ready:hover{transform:translateY(-2px);box-shadow:0 6px 0 rgba(0,80,50,0.45),0 8px 28px rgba(52,211,153,0.45)}
+body.fun-mode .copy-btn.ready:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(0,80,50,0.5)}
+
+/* Fun preview text */
+body.fun-mode .preview-text{color:#c084fc;background:rgba(192,132,252,0.08);border-color:rgba(192,132,252,0.15)}
+
+/* Fun dividers between sections */
+body.fun-mode .section{border-bottom:1px solid transparent;background-image:linear-gradient(var(--bg),var(--bg)),linear-gradient(90deg,transparent,rgba(124,92,252,0.2),rgba(244,114,182,0.15),rgba(34,211,238,0.15),transparent);background-origin:padding-box,border-box;background-clip:padding-box,border-box;padding-bottom:28px;border-radius:4px}
+
+/* Fun emoji burst container */
+.emoji-burst{position:fixed;pointer-events:none;z-index:999;font-size:18px}
+.emoji-burst span{position:absolute;animation:burstOut .5s cubic-bezier(.2,.8,.3,1) forwards}
+@keyframes burstOut{0%{opacity:1;transform:translate(0,0) scale(0.5) rotate(0)}60%{opacity:1;transform:var(--burst-end) scale(1.2) rotate(var(--burst-rot))}100%{opacity:0;transform:var(--burst-end) scale(0.8) rotate(var(--burst-rot))}}
+
+/* Download success page */
+.dl-page{display:none;min-height:100vh;padding:40px 24px;text-align:center}
+.dl-page.visible{display:flex;flex-direction:column;align-items:center;justify-content:center}
+.dl-page .dl-icon{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#34d399,#059669);display:flex;align-items:center;justify-content:center;margin-bottom:24px}
+.dl-page .dl-icon svg{width:32px;height:32px;color:white}
+.dl-page h2{font-size:22px;font-weight:800;margin-bottom:8px}
+.dl-page .dl-subtitle{font-size:14px;color:var(--dim);margin-bottom:32px}
+.dl-page .dl-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;max-width:480px;width:100%;text-align:left;margin-bottom:16px}
+.dl-page .dl-card h3{font-size:15px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.dl-page .dl-card ol{padding-left:20px;margin:0}
+.dl-page .dl-card ol li{font-size:13px;color:rgba(255,255,255,0.7);margin-bottom:8px;line-height:1.5}
+.dl-page .dl-card ol li strong{color:var(--text)}
+.dl-page .dl-or{font-size:12px;font-weight:600;color:rgba(255,255,255,0.2);letter-spacing:.5px;margin-bottom:16px}
+.dl-page .dl-back{display:inline-flex;align-items:center;gap:6px;padding:10px 24px;border-radius:12px;border:none;background:rgba(255,255,255,0.06);color:var(--text);font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;margin-top:8px;text-decoration:none}
+.dl-page .dl-back:hover{background:rgba(255,255,255,0.1);transform:translateY(-1px)}
 </style>
 </head>
 <body>
@@ -135,6 +228,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',system-ui,san
   <div class="header">
     <h1><span>&#x2728;</span> NameCraft</h1>
     <div style="display:flex;align-items:center;gap:8px">
+      <div class="mode-toggle" id="funToggle" onclick="toggleFunMode()">
+        <span class="toggle-icon">&#x2728;</span>
+        <span class="toggle-label">Fun</span>
+        <div class="mode-switch"></div>
+      </div>
       <button class="dl-btn" onclick="clearAll()" style="cursor:pointer;opacity:0.7" title="Reset all fields">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M18 6L6 18M6 6l12 12"/></svg>
         Clear All
@@ -148,43 +246,37 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',system-ui,san
 
   <!-- 1. Brand -->
   <div class="section" id="sec-brand">
-    <div class="section-head"><div class="section-num">1</div><div class="section-title">Brand</div></div>
+    <div class="section-head"><div class="section-num" data-idx="1">1</div><div class="section-title">Brand</div></div>
     <div class="pill-grid cols-5" id="brand-grid"></div>
   </div>
 
   <!-- 2. Type & Task -->
   <div class="section" id="sec-type">
-    <div class="section-head"><div class="section-num">2</div><div class="section-title">Type & Task</div></div>
+    <div class="section-head"><div class="section-num" data-idx="2">2</div><div class="section-title">Type & Task</div></div>
     <div class="field-group">
       <div class="field-label">Type Label</div>
       <div class="pill-grid cols-2" id="type-grid"></div>
     </div>
-    <div class="inline-row">
-      <div class="field-group">
-        <div class="field-label">Task Number <span style="color:#ef4444;font-size:11px;font-weight:500">required</span></div>
-        <div class="input-wrap"><input type="text" id="taskNumber" placeholder="Enter task number..." maxlength="6" inputmode="numeric"></div>
-        <div class="field-hint" id="taskHint">Only the number - type label added automatically</div>
-      </div>
-      <div class="field-group" style="flex:0 0 auto;min-width:140px">
-        <div class="field-label">Variation</div>
-        <div class="stepper">
-          <button id="varMinus" onclick="changeVar(-1)">-</button>
-          <div class="val" id="varVal">v1</div>
-          <button onclick="changeVar(1)">+</button>
-        </div>
-      </div>
+    <div class="field-group">
+      <div class="field-label">Task Number <span style="color:#ef4444;font-size:11px;font-weight:500">required</span></div>
+      <div class="input-wrap"><input type="text" id="taskNumber" placeholder="Enter task number..." maxlength="6" inputmode="numeric"></div>
+      <div class="field-hint" id="taskHint">Only the number - type label added automatically</div>
+    </div>
+    <div class="field-group">
+      <div class="field-label">Variation</div>
+      <div class="lang-row" id="var-row"></div>
     </div>
   </div>
 
   <!-- 3. Platform (dimmed until brand) -->
   <div class="section dimmed" id="sec-platform">
-    <div class="section-head"><div class="section-num">3</div><div class="section-title">Platform</div></div>
+    <div class="section-head"><div class="section-num" data-idx="3">3</div><div class="section-title">Platform</div></div>
     <div class="pill-grid cols-4" id="platform-grid"></div>
   </div>
 
   <!-- 4. Funnel & Info -->
   <div class="section dimmed" id="sec-funnel">
-    <div class="section-head"><div class="section-num">4</div><div class="section-title">Funnel & Info</div></div>
+    <div class="section-head"><div class="section-num" data-idx="4">4</div><div class="section-title">Funnel & Info</div></div>
     <div id="funnel-content"></div>
     <div class="field-group" style="margin-top:16px">
       <div class="field-label">Additional Info <span class="badge">optional</span> <span class="char-count" id="infoCount">0/50</span></div>
@@ -195,76 +287,83 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',system-ui,san
 
   <!-- 5. Language & Date -->
   <div class="section" id="sec-lang">
-    <div class="section-head"><div class="section-num">5</div><div class="section-title">Language & Date</div></div>
+    <div class="section-head"><div class="section-num" data-idx="5">5</div><div class="section-title">Language & Date</div></div>
     <div class="field-group">
       <div class="field-label">Language</div>
       <div class="lang-row" id="lang-row"></div>
-      <div class="cond-field" id="langOtherField" style="display:none">
-        <div class="input-wrap"><input type="text" id="customLang" placeholder="e.g. PT" maxlength="4" style="max-width:100px;text-transform:uppercase"></div>
-      </div>
     </div>
     <div class="field-group">
       <div class="field-label">Date</div>
-      <div class="inline-row" style="align-items:center">
-        <div class="input-wrap"><input type="date" id="dateInput"></div>
-        <button class="lang-pill" onclick="setToday()" style="flex:0 0 auto">Today</button>
-        <button class="lang-pill" onclick="setTomorrow()" style="flex:0 0 auto">Tomorrow</button>
-        <button class="lang-pill" onclick="setPlus7()" style="flex:0 0 auto">+7 days</button>
+      <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">
+        <button class="lang-pill" onclick="setToday()">Today</button>
+        <button class="lang-pill" onclick="setTomorrow()">Tomorrow</button>
+        <button class="lang-pill" onclick="setPlus7()">+7 days</button>
+      </div>
+      <div class="cal-wrap" id="calWrap">
+        <div class="cal-trigger" id="calTrigger" onclick="toggleCal()">
+          <span id="calDisplay"></span>
+          <span class="cal-icon">&#x1F4C5;</span>
+        </div>
+        <div class="cal-drop" id="calDrop">
+          <div class="cal-header">
+            <button onclick="calNav(-1)">&#x25C0;</button>
+            <span class="cal-title" id="calTitle"></span>
+            <button onclick="calNav(1)">&#x25B6;</button>
+          </div>
+          <div class="cal-weekdays"><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span></div>
+          <div class="cal-days" id="calDays"></div>
+        </div>
       </div>
     </div>
   </div>
 
   <!-- 6. Creative & Output -->
   <div class="section dimmed" id="sec-creative">
-    <div class="section-head"><div class="section-num">6</div><div class="section-title">Creative & Output</div></div>
+    <div class="section-head"><div class="section-num" data-idx="6">6</div><div class="section-title">Creative & Output</div></div>
     <div id="producer-content"></div>
     <div class="field-group" id="resolution-content" style="margin-top:16px"></div>
   </div>
 </div>
 
-<!-- Download guide modal -->
-<div class="dl-modal-bg" id="dlModal" onclick="if(event.target===this)closeDlModal()">
-  <div class="dl-modal">
-    <div class="dl-modal-top">
-      <div class="dl-check">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-      </div>
-      <h2>Download started — one thing to know</h2>
-      <button class="dl-close" onclick="closeDlModal()">✕</button>
-    </div>
+<!-- Download success page -->
+<div class="dl-page" id="dlPage">
+  <div class="dl-icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+  </div>
+  <h2>Download Started!</h2>
+  <p class="dl-subtitle">Your DMG file is downloading. Here's how to install NameCraft:</p>
 
-    <div class="dl-warn">
-      <div class="dl-warn-icon">⚠️</div>
-      <p><strong>macOS may block the app</strong> the first time you open it, saying "Apple could not verify…". This is normal for apps distributed outside the App Store. Here's how to fix it:</p>
-    </div>
+  <div class="dl-card">
+    <h3>&#x1F4E6; Installation</h3>
+    <ol>
+      <li>Open the downloaded <strong>NameCraft-1.0.0.dmg</strong> file</li>
+      <li>Drag <strong>NameCraft</strong> into your <strong>Applications</strong> folder</li>
+    </ol>
+  </div>
 
-    <div class="dl-steps">
-      <div class="dl-step">
-        <div class="dl-step-num">1</div>
-        <div class="dl-step-body">
-          <strong>Drag NameCraft to Applications</strong>
-          <span>Open the DMG and drag the app into your Applications folder</span>
-        </div>
-      </div>
-      <div class="dl-step">
-        <div class="dl-step-num">2</div>
-        <div class="dl-step-body">
-          <strong>Right-click the app → Open</strong>
-          <span>Don't double-click — right-click instead, choose Open, then click "Open" in the dialog</span>
-        </div>
-      </div>
-    </div>
+  <div class="dl-card">
+    <h3>&#x26A0;&#xFE0F; First Launch (macOS Gatekeeper)</h3>
+    <p style="font-size:13px;color:rgba(255,255,255,0.7);line-height:1.5;margin-bottom:12px">macOS may block the app the first time, saying "Apple could not verify…". This is normal for apps outside the App Store.</p>
+    <ol>
+      <li><strong>Right-click</strong> the app in Applications → choose <strong>Open</strong></li>
+      <li>Click <strong>"Open"</strong> in the dialog that appears</li>
+    </ol>
+  </div>
 
-    <div class="dl-divider">OR use Terminal (one-time)</div>
+  <p class="dl-or">OR USE TERMINAL (ONE-TIME FIX)</p>
 
+  <div class="dl-card" style="margin-bottom:24px">
     <div class="dl-cmd">
       <code>xattr -dr com.apple.quarantine /Applications/NameCraft.app</code>
       <button id="cmdCopyBtn" onclick="copyCmd()">Copy</button>
     </div>
-    <p style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:6px;margin-bottom:16px">Paste this in Terminal after installing. After that it opens normally, no warnings ever again.</p>
-
-    <button class="dl-got-it" onclick="closeDlModal()">Got it</button>
+    <p style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:8px">Paste this in Terminal after installing. After that it opens normally forever.</p>
   </div>
+
+  <button class="dl-back" onclick="hideDlPage()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+    Back to NameCraft
+  </button>
 </div>
 
 <!-- Sticky preview bar -->
@@ -293,16 +392,22 @@ const PLATFORMS=["FB","GL","QU","TT","OB","NB","SP","SF"];
 const LANGUAGES=[{code:"EN",flag:"\u{1F1EC}\u{1F1E7}"},{code:"ES",flag:"\u{1F1EA}\u{1F1F8}"},{code:"FR",flag:"\u{1F1EB}\u{1F1F7}"},{code:"DE",flag:"\u{1F1E9}\u{1F1EA}"}];
 
 // ===== STATE =====
-let state={brand:null,type:"vid",task:"",variation:1,platform:null,funnel:"",customFunnel:"",useOtherFunnel:false,additionalInfo:"",language:"EN",customLanguage:"",useOtherLang:false,date:new Date(),producer:"",customProducer:"",resolution:"",customResolution:"",useOtherRes:false};
+let state={brand:null,type:"vid",task:"",variation:1,useOtherVar:false,customVariation:"",platform:null,funnel:"",customFunnel:"",useOtherFunnel:false,additionalInfo:"",language:"EN",customLanguage:"",useOtherLang:false,date:new Date(),producer:"",customProducer:"",resolution:"",customResolution:"",useOtherRes:false};
 
 // ===== INIT =====
 function init(){
-  renderBrands();renderTypes();renderPlatforms();renderLanguages();
-  document.getElementById("dateInput").valueAsDate=new Date();
+  renderBrands();renderTypes();renderVariations();renderPlatforms();renderLanguages();
+  calViewDate=new Date(state.date);updateCalDisplay();renderCal();
   document.getElementById("taskNumber").addEventListener("input",e=>{state.task=e.target.value.replace(/\D/g,"").slice(0,6);e.target.value=state.task;validateTask();update()});
   document.getElementById("additionalInfo").addEventListener("input",e=>{state.additionalInfo=e.target.value.slice(0,50);document.getElementById("infoCount").textContent=state.additionalInfo.length+"/50";update()});
-  document.getElementById("dateInput").addEventListener("change",e=>{state.date=e.target.valueAsDate||new Date();update()});
-  document.getElementById("customLang").addEventListener("input",e=>{state.customLanguage=e.target.value.toUpperCase().slice(0,4);e.target.value=state.customLanguage;update()});
+  // Close calendar on outside click
+  document.addEventListener('click',e=>{if(!e.target.closest('#calWrap'))document.getElementById('calDrop').classList.remove('open')});
+  // Fun mode: sparkle burst on every pill/button click
+  document.addEventListener('click',e=>{
+    if(!document.body.classList.contains('fun-mode'))return;
+    const pill=e.target.closest('.pill,.lang-pill');
+    if(pill) sparkleBurst(pill);
+  });
   update();
 }
 
@@ -321,7 +426,11 @@ function renderPlatforms(){
 }
 function renderLanguages(){
   const r=document.getElementById("lang-row");
-  r.innerHTML=LANGUAGES.map(l=>`<div class="lang-pill ${!state.useOtherLang&&state.language===l.code?"active":""}" onclick="selectLang('${l.code}')">${l.flag} ${l.code}</div>`).join("")+`<div class="lang-pill ${state.useOtherLang?"active":""}" onclick="toggleOtherLang()">Other</div>`;
+  const otherBtn=state.useOtherLang
+    ?`<input class="pill-input" id="customLang" placeholder="e.g. PT" maxlength="4" value="${state.customLanguage}" style="text-transform:uppercase;max-width:100px" onclick="event.stopPropagation()" oninput="state.customLanguage=this.value.toUpperCase().slice(0,4);this.value=state.customLanguage;update()">`
+    :`<div class="lang-pill" onclick="toggleOtherLang()">Other</div>`;
+  r.innerHTML=LANGUAGES.map(l=>`<div class="lang-pill ${!state.useOtherLang&&state.language===l.code?"active":""}" onclick="selectLang('${l.code}')">${l.flag} ${l.code}</div>`).join("")+otherBtn;
+  if(state.useOtherLang)setTimeout(()=>{const el=document.getElementById("customLang");if(el)el.focus()},0);
 }
 function renderFunnel(){
   const c=document.getElementById("funnel-content");
@@ -330,7 +439,11 @@ function renderFunnel(){
   if(b.freeText){
     c.innerHTML=`<div class="field-group"><div class="field-label">Funnel</div><div class="input-wrap"><input type="text" id="funnelInput" placeholder="Enter funnel name..." value="${state.customFunnel}" oninput="state.customFunnel=this.value;update()"></div></div>`;
   }else if(b.funnels.length>0){
-    c.innerHTML=`<div class="field-group"><div class="field-label">Funnel</div><div class="pill-grid cols-${Math.min(b.funnels.length+1,4)}">${b.funnels.map(f=>`<div class="pill pill-sm ${!state.useOtherFunnel&&state.funnel===f?"active":""}" onclick="selectFunnel('${f}')">${f}</div>`).join("")}<div class="pill pill-sm ${state.useOtherFunnel?"active":""}" onclick="toggleOtherFunnel()">Other</div></div>${state.useOtherFunnel?`<div class="cond-field"><div class="input-wrap"><input type="text" placeholder="Custom funnel..." value="${state.customFunnel}" oninput="state.customFunnel=this.value;update()"></div></div>`:""}</div>`;
+    const otherPill=state.useOtherFunnel
+      ?`<input class="pill-input" id="funnelOtherInput" placeholder="Custom..." value="${state.customFunnel}" style="padding:10px 12px" onclick="event.stopPropagation()" oninput="state.customFunnel=this.value;update()">`
+      :`<div class="pill pill-sm ${state.useOtherFunnel?"active":""}" onclick="toggleOtherFunnel()">Other</div>`;
+    c.innerHTML=`<div class="field-group"><div class="field-label">Funnel</div><div class="pill-grid cols-${Math.min(b.funnels.length+1,4)}">${b.funnels.map(f=>`<div class="pill pill-sm ${!state.useOtherFunnel&&state.funnel===f?"active":""}" onclick="selectFunnel('${f}')">${f}</div>`).join("")}${otherPill}</div></div>`;
+    if(state.useOtherFunnel)setTimeout(()=>{const el=document.getElementById("funnelOtherInput");if(el)el.focus()},0);
   }else{c.innerHTML=""}
 }
 function renderProducer(){
@@ -347,7 +460,12 @@ function renderResolution(){
   const c=document.getElementById("resolution-content");
   if(!state.brand){c.innerHTML="";return}
   const b=BRANDS.find(x=>x.key===state.brand);
-  c.innerHTML=`<div class="field-label">Resolution</div><div class="input-wrap"><select onchange="selectResolution(this.value)"><option value="">Select...</option>${b.resolutions.map(r=>`<option value="${r}" ${!state.useOtherRes&&state.resolution===r?"selected":""}>${r}</option>`).join("")}<option value="__other__" ${state.useOtherRes?"selected":""}>Other...</option></select></div>${state.useOtherRes?`<div class="cond-field"><div class="input-wrap"><input type="text" placeholder="e.g. 1920x1080" value="${state.customResolution}" style="font-family:monospace;max-width:200px" oninput="state.customResolution=this.value;update()"></div></div>`:""}`;
+  if(state.useOtherRes){
+    c.innerHTML=`<div class="field-label">Resolution</div><div style="display:flex;align-items:center;gap:8px"><input class="pill-input" id="resOtherInput" placeholder="e.g. 1920x1080" value="${state.customResolution}" style="font-family:monospace;max-width:200px" oninput="state.customResolution=this.value;update()"><button class="lang-pill" style="padding:10px 12px;font-size:12px" onclick="selectResolution('')">&#x2190; Back</button></div>`;
+    setTimeout(()=>{const el=document.getElementById("resOtherInput");if(el)el.focus()},0);
+  }else{
+    c.innerHTML=`<div class="field-label">Resolution</div><div class="input-wrap"><select onchange="selectResolution(this.value)"><option value="">Select...</option>${b.resolutions.map(r=>`<option value="${r}" ${state.resolution===r?"selected":""}>${r}</option>`).join("")}<option value="__other__">Other...</option></select></div>`;
+  }
 }
 
 // ===== ACTIONS =====
@@ -369,27 +487,55 @@ function selectPlatform(p){
 }
 function selectFunnel(f){state.funnel=f;state.useOtherFunnel=false;state.customFunnel="";renderFunnel();update()}
 function toggleOtherFunnel(){state.useOtherFunnel=!state.useOtherFunnel;if(!state.useOtherFunnel){state.customFunnel=""}state.funnel="";renderFunnel();update()}
-function selectLang(code){state.language=code;state.useOtherLang=false;state.customLanguage="";document.getElementById("langOtherField").style.display="none";renderLanguages();update()}
-function toggleOtherLang(){state.useOtherLang=!state.useOtherLang;document.getElementById("langOtherField").style.display=state.useOtherLang?"block":"none";if(!state.useOtherLang){state.customLanguage="";state.language="EN"}renderLanguages();update()}
+function selectLang(code){state.language=code;state.useOtherLang=false;state.customLanguage="";renderLanguages();update()}
+function toggleOtherLang(){state.useOtherLang=!state.useOtherLang;if(!state.useOtherLang){state.customLanguage="";state.language="EN"}renderLanguages();update()}
 function selectResolution(v){if(v==="__other__"){state.useOtherRes=true;state.resolution=""}else{state.useOtherRes=false;state.resolution=v;state.customResolution=""}renderResolution();update()}
-function changeVar(d){state.variation=Math.max(1,state.variation+d);document.getElementById("varVal").textContent="v"+state.variation;document.getElementById("varMinus").disabled=state.variation<=1;update()}
-function setToday(){state.date=new Date();document.getElementById("dateInput").valueAsDate=new Date();update()}
-function setTomorrow(){var d=new Date();d.setDate(d.getDate()+1);state.date=d;document.getElementById("dateInput").valueAsDate=d;update()}
-function setPlus7(){var d=new Date();d.setDate(d.getDate()+7);state.date=d;document.getElementById("dateInput").valueAsDate=d;update()}
+function selectVar(n){state.variation=n;state.useOtherVar=false;state.customVariation="";renderVariations();update()}
+function toggleOtherVar(){state.useOtherVar=!state.useOtherVar;if(!state.useOtherVar){state.customVariation="";state.variation=1}else{state.variation=0}renderVariations();update()}
+function renderVariations(){
+  const r=document.getElementById("var-row");
+  const vs='padding:14px 22px;min-width:48px;text-align:center;display:inline-flex;align-items:center;justify-content:center';
+  const otherBtn=state.useOtherVar
+    ?`<input class="pill-input" id="customVar" placeholder="#" maxlength="3" inputmode="numeric" value="${state.customVariation}" style="padding:13px 14px;min-width:60px;max-width:80px;text-align:center;font-family:monospace" onclick="event.stopPropagation()" oninput="state.customVariation=this.value.replace(/\\D/g,'').slice(0,3);this.value=state.customVariation;update()">`
+    :`<div class="lang-pill" style="${vs}" onclick="toggleOtherVar()">Other</div>`;
+  r.innerHTML=[1,2,3,4,5].map(n=>`<div class="lang-pill ${!state.useOtherVar&&state.variation===n?"active":""}" style="${vs}" onclick="selectVar(${n})">${n}</div>`).join("")+otherBtn;
+  if(state.useOtherVar)setTimeout(()=>{const el=document.getElementById("customVar");if(el)el.focus()},0);
+}
+// ===== CUSTOM CALENDAR =====
+let calViewDate=new Date();
+const MONTHS=["January","February","March","April","May","June","July","August","September","October","November","December"];
+function fmtDate(d){return String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0")+"/"+d.getFullYear()}
+function sameDay(a,b){return a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate()}
+function updateCalDisplay(){document.getElementById("calDisplay").textContent=fmtDate(state.date)}
+function toggleCal(){document.getElementById("calDrop").classList.toggle("open");if(document.getElementById("calDrop").classList.contains("open")){calViewDate=new Date(state.date);renderCal()}}
+function calNav(dir){calViewDate.setMonth(calViewDate.getMonth()+dir);renderCal()}
+function renderCal(){
+  document.getElementById("calTitle").textContent=MONTHS[calViewDate.getMonth()]+" "+calViewDate.getFullYear();
+  const g=document.getElementById("calDays");g.innerHTML="";
+  const y=calViewDate.getFullYear(),m=calViewDate.getMonth();
+  const first=new Date(y,m,1);const lastDay=new Date(y,m+1,0).getDate();
+  let startDow=(first.getDay()+6)%7;// Monday=0
+  const prevLast=new Date(y,m,0).getDate();
+  const today=new Date();
+  for(let i=startDow-1;i>=0;i--){const btn=document.createElement("button");btn.className="cal-day other";btn.textContent=prevLast-i;const d=new Date(y,m-1,prevLast-i);btn.onclick=()=>pickDate(d);g.appendChild(btn)}
+  for(let i=1;i<=lastDay;i++){const btn=document.createElement("button");btn.className="cal-day";const d=new Date(y,m,i);if(sameDay(d,today))btn.classList.add("today");if(sameDay(d,state.date))btn.classList.add("selected");btn.textContent=i;btn.onclick=()=>pickDate(d);g.appendChild(btn)}
+  const total=startDow+lastDay;const rem=(7-total%7)%7;
+  for(let i=1;i<=rem;i++){const btn=document.createElement("button");btn.className="cal-day other";btn.textContent=i;const d=new Date(y,m+1,i);btn.onclick=()=>pickDate(d);g.appendChild(btn)}
+}
+function pickDate(d){state.date=d;calViewDate=new Date(d);updateCalDisplay();renderCal();document.getElementById("calDrop").classList.remove("open");update()}
+function setToday(){pickDate(new Date())}
+function setTomorrow(){var d=new Date();d.setDate(d.getDate()+1);pickDate(d)}
+function setPlus7(){var d=new Date();d.setDate(d.getDate()+7);pickDate(d)}
 function clearAll(){
-  state={brand:null,type:"vid",task:"",variation:1,platform:null,funnel:"",customFunnel:"",useOtherFunnel:false,additionalInfo:"",language:"EN",customLanguage:"",useOtherLang:false,date:new Date(),producer:"",customProducer:"",resolution:"",customResolution:"",useOtherRes:false};
+  state={brand:null,type:"vid",task:"",variation:1,useOtherVar:false,customVariation:"",platform:null,funnel:"",customFunnel:"",useOtherFunnel:false,additionalInfo:"",language:"EN",customLanguage:"",useOtherLang:false,date:new Date(),producer:"",customProducer:"",resolution:"",customResolution:"",useOtherRes:false};
   document.getElementById("taskNumber").value="";
-  document.getElementById("dateInput").valueAsDate=new Date();
+  calViewDate=new Date();updateCalDisplay();renderCal();
   document.getElementById("additionalInfo").value="";
   document.getElementById("infoCount").textContent="0/50";
-  document.getElementById("customLang").value="";
-  document.getElementById("langOtherField").style.display="none";
   document.querySelectorAll("#brand-grid .pill").forEach(p=>p.classList.remove("active"));
   document.querySelectorAll("#platform-grid .pill").forEach(p=>p.classList.remove("active"));
-  document.getElementById("varVal").textContent="v1";
-  document.getElementById("varMinus").disabled=true;
   ["sec-platform","sec-funnel","sec-creative"].forEach(id=>document.getElementById(id).classList.add("dimmed"));
-  renderTypes();renderLanguages();renderFunnel();renderProducer();renderResolution();update();
+  renderTypes();renderVariations();renderLanguages();renderFunnel();renderProducer();renderResolution();update();
 }
 function validateTask(){
   const h=document.getElementById("taskHint");const i=document.getElementById("taskNumber");
@@ -407,7 +553,7 @@ function generateFilename(){
   const yyyy=state.date.getFullYear();
   const dateStr=`${dd}-${mm}-${yyyy}`;
   const typeTask=state.type+(state.task||"");
-  const variation="v"+state.variation;
+  const variation="v"+(state.useOtherVar?state.customVariation||"1":state.variation);
   const platform=state.platform||"";
   const funnel=b.freeText||state.useOtherFunnel?state.customFunnel:state.funnel;
   const info=state.additionalInfo.replace(/[/\\:*?"<>|]/g,"_").trim();
@@ -422,29 +568,37 @@ function update(){
   const fn=generateFilename();
   const el=document.getElementById("previewText");
   const btn=document.getElementById("copyBtn");
-  if(fn){el.textContent=fn;el.classList.remove("empty");btn.className="copy-btn ready";btn.textContent="Copy"}
-  else{el.textContent="Select a brand to preview";el.classList.add("empty");btn.className="copy-btn disabled";btn.textContent="Copy"}
+  const on=document.body.classList.contains('fun-mode');
+  if(fn){el.textContent=fn;el.classList.remove("empty");btn.className="copy-btn ready";btn.textContent=on?"Snag that name! \u2728":"Copy"}
+  else{el.textContent=on?"Fill the fields and watch the magic \u2728":"Select a brand to preview";el.classList.add("empty");btn.className="copy-btn disabled";btn.textContent=on?"Almost there... keep going":"Copy"}
 }
 
 // ===== COPY =====
 function copyFilename(){
   const fn=generateFilename();if(!fn)return;
+  const on=document.body.classList.contains('fun-mode');
   navigator.clipboard.writeText(fn).then(()=>{
     const btn=document.getElementById("copyBtn");
-    btn.className="copy-btn copied";btn.textContent="Copied!";
-    setTimeout(()=>{btn.className="copy-btn ready";btn.textContent="Copy"},1500);
+    btn.className="copy-btn copied";
+    btn.textContent=on?FUN_COPY_MSGS[Math.floor(Math.random()*FUN_COPY_MSGS.length)]:"Copied!";
+    if(on) emojiBurst(btn);
+    setTimeout(()=>{btn.className="copy-btn ready";btn.textContent=on?"Snag that name! \u2728":"Copy"},1800);
   });
 }
 
 // ===== DOWNLOAD GUIDE =====
 function showDownloadGuide(e){
-  // Let the browser follow the href (starts the download), then show the modal
+  // Let the browser follow the href (starts the download), then show success page
   setTimeout(()=>{
-    document.getElementById('dlModal').classList.add('visible');
+    document.querySelector('.app').style.display='none';
+    document.querySelector('.preview-bar').style.display='none';
+    document.getElementById('dlPage').classList.add('visible');
   }, 300);
 }
-function closeDlModal(){
-  document.getElementById('dlModal').classList.remove('visible');
+function hideDlPage(){
+  document.getElementById('dlPage').classList.remove('visible');
+  document.querySelector('.app').style.display='';
+  document.querySelector('.preview-bar').style.display='';
 }
 function copyCmd(){
   const cmd='xattr -dr com.apple.quarantine /Applications/NameCraft.app';
@@ -453,6 +607,88 @@ function copyCmd(){
     btn.textContent='Copied!';btn.classList.add('copied-state');
     setTimeout(()=>{btn.textContent='Copy';btn.classList.remove('copied-state')},2000);
   });
+}
+
+// ===== FUN MODE =====
+const SECTION_EMOJIS={1:"\u{1F3AF}",2:"\u26A1",3:"\u{1F310}",4:"\u{1F52E}",5:"\u{1F5D3}\uFE0F",6:"\u{1F3A8}"};
+const FUN_COPY_MSGS=["Copied! You legend! \u{1F525}","Snagged it! \u{1F4AA}","Boom! Got it! \u{1F4A5}","Copy that, chief! \u{1FAE1}","Mission complete! \u{1F680}","Chef's kiss! \u{1F468}\u200D\u{1F373}","You're on fire! \u{1F525}","Speed run! \u26A1","W move! \u{1F3C6}","Main character energy! \u{1F451}","EZ clap! \u{1F44F}","Yoink! \u{1F60F}","*chef's kiss* \u{1F48B}","Locked in! \u{1F512}","Built different! \u{1F4AA}"];
+const BURST_EMOJIS=["\u2728","\u{1F389}","\u{1F4A5}","\u26A1","\u{1F525}","\u{1F4AB}","\u{1F38A}","\u{1F929}","\u{1F48E}","\u{1F308}"];
+
+function toggleFunMode(){
+  const t=document.getElementById('funToggle');
+  const on=!t.classList.contains('fun-active');
+  t.classList.toggle('fun-active');
+  document.body.classList.toggle('fun-mode');
+  // Swap section numbers <-> emojis
+  document.querySelectorAll('.section-num').forEach(el=>{
+    const idx=el.dataset.idx;
+    if(on) el.textContent=SECTION_EMOJIS[idx]||idx;
+    else el.textContent=idx;
+  });
+  // Update copy button text
+  updateFunUI();
+  // Emoji burst on toggle ON
+  if(on) emojiBurst(t);
+}
+
+function updateFunUI(){
+  const btn=document.getElementById("copyBtn");
+  const fn=generateFilename();
+  const on=document.body.classList.contains('fun-mode');
+  if(!fn){
+    btn.textContent=on?"Almost there... keep going":"Copy";
+  }else{
+    btn.textContent=on?"Snag that name! \u2728":"Copy";
+  }
+}
+
+function emojiBurst(target){
+  const r=target.getBoundingClientRect();
+  const cx=r.left+r.width/2;
+  const cy=r.top+r.height/2;
+  const container=document.createElement('div');
+  container.className='emoji-burst';
+  container.style.left=cx+'px';container.style.top=cy+'px';
+  for(let i=0;i<8;i++){
+    const span=document.createElement('span');
+    span.textContent=BURST_EMOJIS[Math.floor(Math.random()*BURST_EMOJIS.length)];
+    const angle=(360/8)*i+(Math.random()*30-15);
+    const dist=50+Math.random()*40;
+    const dx=Math.cos(angle*Math.PI/180)*dist;
+    const dy=Math.sin(angle*Math.PI/180)*dist;
+    const rot=(Math.random()*50-25)+'deg';
+    span.style.setProperty('--burst-end',`translate(${dx}px,${dy}px)`);
+    span.style.setProperty('--burst-rot',rot);
+    container.appendChild(span);
+  }
+  document.body.appendChild(container);
+  setTimeout(()=>container.remove(),600);
+}
+
+function sparkleBurst(target){
+  const r=target.getBoundingClientRect();
+  const cx=r.left+r.width/2;
+  const cy=r.top+r.height/2;
+  const sparkles=["\u2728","\u2B50","\u{1F31F}","\u{1F4AB}","\u2728","\u2B50"];
+  const container=document.createElement('div');
+  container.className='emoji-burst';
+  container.style.left=cx+'px';container.style.top=cy+'px';
+  const count=5+Math.floor(Math.random()*3);
+  for(let i=0;i<count;i++){
+    const span=document.createElement('span');
+    span.textContent=sparkles[Math.floor(Math.random()*sparkles.length)];
+    span.style.fontSize=(10+Math.random()*8)+'px';
+    const angle=(360/count)*i+(Math.random()*40-20);
+    const dist=30+Math.random()*35;
+    const dx=Math.cos(angle*Math.PI/180)*dist;
+    const dy=Math.sin(angle*Math.PI/180)*dist;
+    const rot=(Math.random()*60-30)+'deg';
+    span.style.setProperty('--burst-end',`translate(${dx}px,${dy}px)`);
+    span.style.setProperty('--burst-rot',rot);
+    container.appendChild(span);
+  }
+  document.body.appendChild(container);
+  setTimeout(()=>container.remove(),550);
 }
 
 init();
