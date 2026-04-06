@@ -426,7 +426,7 @@ const PLATFORMS=["FB","GL","QU","TT","OB","NB","SP","SF"];
 const LANGUAGES=[{code:"EN",flag:"\u{1F1EC}\u{1F1E7}"},{code:"ES",flag:"\u{1F1EA}\u{1F1F8}"},{code:"FR",flag:"\u{1F1EB}\u{1F1F7}"},{code:"DE",flag:"\u{1F1E9}\u{1F1EA}"}];
 
 // ===== STATE =====
-let state={brand:null,type:"vid",task:"",variation:1,useOtherVar:false,customVariation:"",platform:null,funnel:"",customFunnel:"",useOtherFunnel:false,additionalInfo:"",language:"EN",customLanguage:"",useOtherLang:false,date:new Date(),producer:"",customProducer:"",resolution:"",customResolution:"",useOtherRes:false};
+let state={brand:null,type:null,task:"",variation:1,useOtherVar:false,customVariation:"",platform:null,funnel:"",customFunnel:"",useOtherFunnel:false,additionalInfo:"",language:"",customLanguage:"",useOtherLang:false,date:new Date(),producer:"",customProducer:"",resolution:"",customResolution:"",useOtherRes:false};
 
 // ===== INIT =====
 function init(){
@@ -481,7 +481,7 @@ function renderFunnel(){
   }else{c.innerHTML=""}
 }
 const AVATAR_COLORS=["#ef6464","#66a8ff","#d97ced","#3cd990","#f0a93a","#8b7ef5","#3de0e0","#ff6e9a"];
-const FUN_EMOJIS=["🎨","🖌️","🧑‍🎨","🦄","🌈","🎭","🎬","📸","🪄","🧙","🎸","🥳","🦸","🤹","🎵","🌟","💅","🔥","⚡","🎯","🚀","🦊"];
+const FUN_EMOJIS=["🎨","🖌️","🧑‍🎨","🦄","🌈","🎭","🎬","📸","🪄","🧙‍♀️","🎸","🥳","🦸","🤹","🎪","🎵","🌟","💅","🔥","⚡","🎯","🚀","👽","🤖","🧛","🧜‍♀️","🦹","🐉","🦊","🐙","🎩","💎","🍕","🧁","🎮","🕹️","🛸","🌶️","🦑","🧞","🪩","🫧","🍭","🏄","🤸","🎤","🧑‍🚀","🦋","🐸","🍄","🫠","🤯","👾","🧃","🏆","🎲","🃏","🦜","🐧","🦖","🧊","💫"];
 function avatarColor(str){let h=0;for(const c of str)h=(h+c.charCodeAt(0))%AVATAR_COLORS.length;return AVATAR_COLORS[h]}
 function avatarEmoji(str){let h=0;for(const c of str)h=(h+c.charCodeAt(0))%FUN_EMOJIS.length;return FUN_EMOJIS[h]}
 function producerFirstName(label){return label.split(" ")[0]}
@@ -560,9 +560,9 @@ function renderResolution(){
 function selectBrand(key){
   state.brand=key;
   const b=BRANDS.find(x=>x.key===key);
-  state.funnel=b.funnels[0]||"";state.customFunnel="";state.useOtherFunnel=false;
-  state.producer=b.producers[0]?.v||"";state.customProducer="";
-  state.resolution=b.resolutions[0]||"";state.customResolution="";state.useOtherRes=false;
+  state.funnel="";state.customFunnel="";state.useOtherFunnel=false;
+  state.producer="";state.customProducer="";
+  state.resolution="";state.customResolution="";state.useOtherRes=false;
   document.querySelectorAll("#brand-grid .pill").forEach(p=>p.classList.toggle("active",p.dataset.brand===key));
   ["sec-platform","sec-funnel","sec-creative"].forEach(id=>document.getElementById(id).classList.remove("dimmed"));
   renderFunnel();renderProducer();renderResolution();update();
@@ -576,7 +576,7 @@ function selectPlatform(p){
 function selectFunnel(f){state.funnel=f;state.useOtherFunnel=false;state.customFunnel="";renderFunnel();update()}
 function toggleOtherFunnel(){state.useOtherFunnel=!state.useOtherFunnel;if(!state.useOtherFunnel){state.customFunnel=""}state.funnel="";renderFunnel();update()}
 function selectLang(code){state.language=code;state.useOtherLang=false;state.customLanguage="";renderLanguages();update()}
-function toggleOtherLang(){state.useOtherLang=!state.useOtherLang;if(!state.useOtherLang){state.customLanguage="";state.language="EN"}renderLanguages();update()}
+function toggleOtherLang(){state.useOtherLang=!state.useOtherLang;if(!state.useOtherLang){state.customLanguage="";state.language=""}renderLanguages();update()}
 function selectResolution(v,mode){
   if(mode==="other"){state.useOtherRes=true;state.resolution=""}
   else if(mode==="back"){state.useOtherRes=false;state.resolution="";state.customResolution=""}
@@ -620,7 +620,7 @@ function setToday(){pickDate(new Date())}
 function setTomorrow(){var d=new Date();d.setDate(d.getDate()+1);pickDate(d)}
 function setPlus7(){var d=new Date();d.setDate(d.getDate()+7);pickDate(d)}
 function clearAll(){
-  state={brand:null,type:"vid",task:"",variation:1,useOtherVar:false,customVariation:"",platform:null,funnel:"",customFunnel:"",useOtherFunnel:false,additionalInfo:"",language:"EN",customLanguage:"",useOtherLang:false,date:new Date(),producer:"",customProducer:"",resolution:"",customResolution:"",useOtherRes:false};
+  state={brand:null,type:null,task:"",variation:1,useOtherVar:false,customVariation:"",platform:null,funnel:"",customFunnel:"",useOtherFunnel:false,additionalInfo:"",language:"",customLanguage:"",useOtherLang:false,date:new Date(),producer:"",customProducer:"",resolution:"",customResolution:"",useOtherRes:false};
   document.getElementById("taskNumber").value="";
   calViewDate=new Date();updateCalDisplay();renderCal();
   document.getElementById("additionalInfo").value="";

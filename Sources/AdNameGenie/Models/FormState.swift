@@ -5,20 +5,23 @@ import AppKit
 @Observable
 class FormState {
     var brand: Brand?
-    var typeLabel: TypeLabel = .vid
+    var typeLabel: TypeLabel? = nil
     var taskNumber: String = ""
     var variation: Int = 1
     var platform: Platform?
     var funnel: String = ""
     var customFunnel: String = ""
     var additionalInfo: String = ""
-    var language: String = "EN"
+    var language: String = ""
     var customLanguage: String = ""
     var date: Date = Date()
     var creativeProducer: String = ""
     var customCreativeProducer: String = ""
     var resolution: String = ""
     var customResolution: String = ""
+
+    var useOtherVariation: Bool = false
+    var customVariation: String = ""
 
     var useOtherFunnel: Bool = false
     var useOtherLanguage: Bool = false
@@ -29,7 +32,9 @@ class FormState {
 
     var showCopiedToast: Bool = false
 
-    var variationString: String { "v\(variation)" }
+    var variationString: String {
+        useOtherVariation ? (customVariation.isEmpty ? "v?" : "v\(customVariation)") : "v\(variation)"
+    }
 
     var effectiveFunnel: String {
         guard let brand else { return "" }
@@ -93,7 +98,7 @@ class FormState {
         dateFormatter.dateFormat = "dd-MM-yyyy"
         let dateStr = dateFormatter.string(from: date)
 
-        let typeTask = "\(typeLabel.rawValue)\(taskNumber)"
+        let typeTask = "\(typeLabel?.rawValue ?? "")\(taskNumber)"
         let funnelValue = effectiveFunnel
         let cpValue = config.creativeProducers.isEmpty ? customCreativeProducer : creativeProducer
         let langValue = effectiveLanguage
@@ -198,14 +203,16 @@ class FormState {
 
     func clearAll() {
         brand = nil
-        typeLabel = .vid
+        typeLabel = nil
         taskNumber = ""
         variation = 1
+        useOtherVariation = false
+        customVariation = ""
         platform = nil
         funnel = ""
         customFunnel = ""
         additionalInfo = ""
-        language = "EN"
+        language = ""
         customLanguage = ""
         date = Date()
         creativeProducer = ""
@@ -229,12 +236,6 @@ class FormState {
         useOtherFunnel = false
         useOtherResolution = false
         if let brand {
-            if let first = brand.config.creativeProducers.first {
-                creativeProducer = first.value
-            }
-            if let first = brand.config.resolutions.first {
-                resolution = first.value
-            }
             UserDefaults.standard.set(brand.rawValue, forKey: "lastBrand")
         }
     }

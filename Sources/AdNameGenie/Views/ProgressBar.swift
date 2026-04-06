@@ -18,60 +18,35 @@ struct ProgressBar: View {
                 let (section, label) = pair
                 let done = form.isComplete(section)
                 let isActive = !done && (i == 0 || form.isComplete(steps[i - 1].0))
+                let prevDone = i > 0 && form.isComplete(steps[i - 1].0)
 
                 if i > 0 {
                     Rectangle()
-                        .fill(form.isComplete(steps[i - 1].0)
+                        .fill(prevDone
                               ? (fun ? stepColors[i - 1].opacity(0.4) : Color.primary.opacity(0.2))
                               : (fun ? Color.white.opacity(0.06) : Color.primary.opacity(0.06)))
                         .frame(height: 1.5)
                 }
 
                 Button { onScrollTo(section) } label: {
-                    VStack(spacing: 3) {
-                        ZStack {
-                            if fun {
-                                Circle()
-                                    .fill(done
-                                          ? LinearGradient(colors: [stepColors[i], stepColors[i].opacity(0.7)], startPoint: .top, endPoint: .bottom)
-                                          : LinearGradient(colors: [Color(white: 0.18), Color(white: 0.12)], startPoint: .top, endPoint: .bottom))
-                                    .frame(width: done ? 18 : (isActive ? 18 : 14), height: done ? 18 : (isActive ? 18 : 14))
-                                    .shadow(color: done ? stepColors[i].opacity(0.5) : .clear, radius: 5, y: 2)
-                            } else {
-                                Circle()
-                                    .fill(done ? Color.primary : (isActive ? Color.primary.opacity(0.12) : Color.primary.opacity(0.06)))
-                                    .frame(width: done ? 18 : (isActive ? 18 : 14), height: done ? 18 : (isActive ? 18 : 14))
-                            }
-
-                            if done {
-                                Image(systemName: "checkmark")
-                                    .font(.system(size: 8, weight: .black))
-                                    .foregroundStyle(.white)
-                            } else {
-                                Text("\(i + 1)")
-                                    .font(.system(size: 8, weight: .bold, design: .rounded))
-                                    .foregroundStyle(fun ? Color.white.opacity(isActive ? 0.6 : 0.25) : (isActive ? .primary : Color.secondary.opacity(0.4)))
-                            }
-                        }
-                        .animation(.spring(response: 0.3, dampingFraction: 0.6), value: done)
-
-                        Text(label)
-                            .font(.system(size: 9, weight: done ? .bold : .medium, design: fun ? .rounded : .default))
-                            .foregroundStyle(done ? (fun ? stepColors[i] : Color.primary) : (fun ? Color.white.opacity(0.3) : Color.secondary))
-                            .lineLimit(1)
-                    }
-                    .frame(width: 52)
+                    StepDot(
+                        index: i,
+                        label: label,
+                        done: done,
+                        isActive: isActive,
+                        color: stepColors[i],
+                        fun: fun
+                    )
                 }
                 .buttonStyle(.plain)
             }
 
             Spacer(minLength: 4)
 
-            // Clear all — icon only to prevent text wrapping
             Button(action: onClearAll) {
                 Image(systemName: fun ? "flame.fill" : "xmark.circle")
                     .font(.system(size: 12, weight: .medium))
-                    .foregroundStyle(fun ? .red : .secondary)
+                    .foregroundStyle(fun ? Color.red : Color.secondary)
                     .frame(width: 28, height: 28)
                     .background {
                         if fun {
@@ -94,5 +69,61 @@ struct ProgressBar: View {
                 Rectangle().fill(.bar)
             }
         }
+    }
+}
+
+private struct StepDot: View {
+    let index: Int
+    let label: String
+    let done: Bool
+    let isActive: Bool
+    let color: Color
+    let fun: Bool
+
+    private var labelColor: Color {
+        if done   { return fun ? color : Color.primary }
+        if isActive { return fun ? color.opacity(0.85) : Color.primary }
+        return fun ? Color.white.opacity(0.2) : Color.secondary.opacity(0.35)
+    }
+    private var labelWeight: Font.Weight {
+        done ? .bold : (isActive ? .semibold : .regular)
+    }
+
+    var body: some View {
+        VStack(spacing: 4) {
+            ZStack {
+                if done {
+                    Circle()
+                        .fill(fun
+                              ? AnyShapeStyle(LinearGradient(colors: [color, color.opacity(0.7)], startPoint: .top, endPoint: .bottom))
+                              : AnyShapeStyle(Color.primary))
+                        .frame(width: 20, height: 20)
+                        .shadow(color: fun ? color.opacity(0.45) : .clear, radius: 5, y: 2)
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 9, weight: .black))
+                        .foregroundStyle(.white)
+                } else if isActive {
+                    Circle()
+                        .strokeBorder(fun ? color : Color.primary, lineWidth: 2)
+                        .frame(width: 20, height: 20)
+                    Text("\(index + 1)")
+                        .font(.system(size: 9, weight: .bold, design: .rounded))
+                        .foregroundStyle(fun ? color : Color.primary)
+                } else {
+                    Circle()
+                        .fill(fun ? Color.white.opacity(0.12) : Color.primary.opacity(0.15))
+                        .frame(width: 7, height: 7)
+                }
+            }
+            .frame(width: 20, height: 20)
+            .animation(.spring(response: 0.3, dampingFraction: 0.6), value: done)
+            .animation(.spring(response: 0.3, dampingFraction: 0.6), value: isActive)
+
+            Text(label)
+                .font(.system(size: 9, weight: labelWeight, design: fun ? .rounded : .default))
+                .foregroundStyle(labelColor)
+                .lineLimit(1)
+        }
+        .frame(width: 52)
     }
 }

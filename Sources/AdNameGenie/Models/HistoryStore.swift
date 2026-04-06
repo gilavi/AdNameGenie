@@ -49,7 +49,7 @@ class HistoryStore {
     func add(filename: String, form: FormState) {
         let config = HistoryConfig(
             brand: form.brand?.rawValue ?? "",
-            typeLabel: form.typeLabel.rawValue,
+            typeLabel: form.typeLabel?.rawValue ?? "vid",
             taskNumber: form.taskNumber,
             variation: form.variation,
             platform: form.platform?.rawValue ?? "",

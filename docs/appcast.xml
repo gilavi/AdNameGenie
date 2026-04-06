@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <channel>
+    <title>NameCraft</title>
+    <link>https://gilavi.github.io/AdNameGenie/</link>
+    <description>NameCraft update feed</description>
+    <language>en</language>
+
+    <item>
+      <title>Version 1.0.0</title>
+      <pubDate>Sun, 06 Apr 2026 00:00:00 +0000</pubDate>
+      <sparkle:releaseNotesLink>https://gilavi.github.io/AdNameGenie/release-notes/1.0.0.html</sparkle:releaseNotesLink>
+      <enclosure
+        url="https://github.com/gilavi/AdNameGenie/releases/download/v1.0.0/NameCraft-1.0.0.dmg"
+        sparkle:version="1.0.0"
+        sparkle:shortVersionString="1.0.0"
+        sparkle:edSignature="zlQsTX6CuPdLiBAUIVRYESEYqgmiIDA8VU5keP4sgFx3kGbg+uFAYlV/Flymi8aAMDUcdleHPBVSHzfW4GL0Dw=="
+        length="2000955"
+        type="application/octet-stream" />
+    </item>
+
+  </channel>
+</rss>

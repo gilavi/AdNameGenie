@@ -119,7 +119,11 @@ private struct ProducerAvatarChip: View {
         Color(red: 0.25, green: 0.88, blue: 0.88),
         Color(red: 1.0,  green: 0.45, blue: 0.62),
     ]
-    private static let funEmojis = ["🎨","🖌️","🧑‍🎨","🦄","🌈","🎭","🎬","📸","🪄","🧙‍♀️","🎸","🥳","🦸","🤹","🎪","🎵","🌟","💅","🔥","⚡","🎯","🚀"]
+    private static let funEmojis = [
+        "🎨","🖌️","🧑‍🎨","🦄","🌈","🎭","🎬","📸","🪄","🧙‍♀️","🎸","🥳","🦸","🤹","🎪","🎵","🌟","💅","🔥","⚡","🎯","🚀",
+        "👽","🤖","🧛","🧜‍♀️","🦹","🐉","🦊","🐙","🎩","💎","🍕","🧁","🎮","🕹️","🛸","🌶️","🦑","🐱‍👤","🧞","🪩","🫧","🍭",
+        "🏄","🤸","🎤","🧑‍🚀","🦋","🐸","🍄","🫠","🤯","👾","🧃","🎪","🏆","🎲","🃏","🦜","🐧","🦖","🧊","💫"
+    ]
 
     private var avatarColor: Color {
         let hash = initials.unicodeScalars.reduce(0) { $0 &+ Int($1.value) }
@@ -161,12 +165,21 @@ private struct ProducerAvatarChip: View {
                 }
                 .overlay {
                     Circle().stroke(
-                        isSelected
-                            ? (fun ? avatarColor : avatarColor.opacity(0.6))
-                            : (hovered ? avatarColor.opacity(0.3) : Color.primary.opacity(0.08)),
-                        lineWidth: isSelected ? 2.5 : 1
+                        hovered && !isSelected ? avatarColor.opacity(0.3) : Color.clear,
+                        lineWidth: 1
                     )
                 }
+                // Selection ring: gap + outer border
+                .padding(3)
+                .overlay {
+                    if isSelected {
+                        Circle().stroke(
+                            fun ? avatarColor : .white,
+                            lineWidth: 2.5
+                        )
+                    }
+                }
+                .padding(-3)
                 .scaleEffect(pressing ? 0.92 : (hovered && !isPreview ? (fun ? 1.08 : 1.04) : 1.0))
                 .offset(y: fun && pressing ? 3 : 0)
                 .animation(.spring(response: 0.2, dampingFraction: 0.6), value: pressing)

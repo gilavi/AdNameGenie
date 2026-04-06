@@ -13,337 +13,11 @@ struct MiniPopoverView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Header
-            HStack(spacing: 6) {
-                if fun { Text("✨").font(.system(size: 11)) }
-                Text("NameCraft")
-                    .font(.system(size: 12, weight: .bold, design: fun ? .rounded : .default))
-                Spacer()
-                modeToggleButton
-                expandButton
-            }
-            .padding(.horizontal, 14).padding(.top, 12).padding(.bottom, 8)
-
+            miniHeader
             miniDivider
-
-            // Form
-            VStack(alignment: .leading, spacing: 10) {
-
-                // Brand — 4 columns = 3 rows, bigger chips
-                miniSection("Brand") {
-                    LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 6), count: 4), spacing: 6) {
-                        ForEach(Brand.allCases) { brand in
-                            MiniBrandChip(brand: brand, isSelected: form.brand == brand) {
-                                if form.brand != brand {
-                                    withAnimation(.easeInOut(duration: 0.2)) {
-                                        form.brand = brand; form.onBrandChange()
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                miniDivider
-
-                // Type
-                miniSection("Type") {
-                    HStack(spacing: 6) {
-                        miniPill("vid", selected: form.typeLabel == .vid, colors: FunColors.vidGradient) { form.typeLabel = .vid }
-                        miniPill("img", selected: form.typeLabel == .img, colors: FunColors.imgGradient) { form.typeLabel = .img }
-                    }
-                }
-
-                // Task + Variation
-                HStack(spacing: 10) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        miniLabel("Task #")
-                        TextField("123", text: Binding(
-                            get: { form.taskNumber },
-                            set: { form.taskNumber = $0; form.validateTaskNumber() }
-                        ))
-                        .textFieldStyle(.plain)
-                        .font(.system(size: 14, weight: .bold, design: .monospaced))
-                        .padding(.horizontal, 10).padding(.vertical, 9)
-                        .background(RoundedRectangle(cornerRadius: DS.funRadius).fill(fun ? Color(white: 0.14) : Color.primary.opacity(0.05)))
-                        .overlay(RoundedRectangle(cornerRadius: DS.funRadius).strokeBorder(fun ? Color.white.opacity(0.12) : Color.primary.opacity(0.12)))
-                    }
-
-                    VStack(alignment: .leading, spacing: 4) {
-                        miniLabel("Variation")
-                        HStack(spacing: 0) {
-                            // Minus — big tap area
-                            Button {
-                                if form.variation > 1 { withAnimation { form.variation -= 1 } }
-                            } label: {
-                                Image(systemName: "minus")
-                                    .font(.system(size: 11, weight: .bold))
-                                    .foregroundStyle(fun ? .white : .primary)
-                                    .frame(width: 36, height: 36)
-                                    .contentShape(Rectangle())
-                            }
-                            .buttonStyle(.plain)
-                            .opacity(form.variation <= 1 ? 0.25 : 1)
-
-                            Text("v\(form.variation)")
-                                .font(.system(size: 14, weight: .bold, design: .monospaced))
-                                .contentTransition(.numericText())
-                                .animation(.spring(response: 0.25, dampingFraction: 0.6), value: form.variation)
-                                .frame(minWidth: 34)
-
-                            // Plus — big tap area
-                            Button {
-                                withAnimation { form.variation += 1 }
-                            } label: {
-                                Image(systemName: "plus")
-                                    .font(.system(size: 11, weight: .bold))
-                                    .foregroundStyle(fun ? .white : .primary)
-                                    .frame(width: 36, height: 36)
-                                    .contentShape(Rectangle())
-                            }
-                            .buttonStyle(.plain)
-                        }
-                        .background(RoundedRectangle(cornerRadius: DS.funRadius).fill(fun ? Color(white: 0.14) : Color.primary.opacity(0.05)))
-                        .overlay(RoundedRectangle(cornerRadius: DS.funRadius).strokeBorder(fun ? Color.white.opacity(0.1) : Color.primary.opacity(0.1)))
-                    }
-                }
-
-                // Brand-dependent sections
-                if let brand = form.brand {
-                    let config = brand.config
-                    miniDivider
-
-                    // Platform
-                    miniSection("Platform") {
-                        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 6), count: 4), spacing: 6) {
-                            ForEach(Platform.allCases) { p in
-                                miniPill(p.rawValue, selected: form.platform == p, colors: FunColors.platformGradient(p)) {
-                                    withAnimation(.easeInOut(duration: 0.2)) { form.platform = p }
-                                }
-                            }
-                        }
-                    }
-
-                    // Language + Other
-                    miniSection("Language") {
-                        VStack(alignment: .leading, spacing: 6) {
-                            HStack(spacing: 6) {
-                                ForEach(Language.allCases) { lang in
-                                    miniPill("\(lang.flag) \(lang.rawValue)",
-                                             selected: !form.useOtherLanguage && form.language == lang.rawValue,
-                                             colors: FunColors.langGradient(lang.rawValue)) {
-                                        withAnimation(.easeInOut(duration: 0.2)) {
-                                            form.language = lang.rawValue
-                                            form.useOtherLanguage = false
-                                            form.customLanguage = ""
-                                        }
-                                    }
-                                }
-                                miniPill("Other", selected: form.useOtherLanguage,
-                                         colors: [Color.gray.opacity(0.6), Color.gray.opacity(0.4)]) {
-                                    withAnimation(.easeInOut(duration: 0.2)) {
-                                        form.useOtherLanguage.toggle()
-                                        if !form.useOtherLanguage { form.customLanguage = ""; form.language = "EN" }
-                                    }
-                                }
-                            }
-                            if form.useOtherLanguage {
-                                TextField("e.g. PT", text: Binding(
-                                    get: { form.customLanguage },
-                                    set: { form.customLanguage = $0.uppercased() }
-                                ))
-                                .textFieldStyle(.plain)
-                                .font(.system(size: 12, weight: .medium, design: .monospaced))
-                                .padding(.horizontal, 8).padding(.vertical, 6)
-                                .frame(maxWidth: 100)
-                                .background(RoundedRectangle(cornerRadius: DS.funRadius).fill(fun ? Color(white: 0.14) : Color.primary.opacity(0.05)))
-                                .overlay(RoundedRectangle(cornerRadius: DS.funRadius).strokeBorder(fun ? Color.white.opacity(0.12) : Color.primary.opacity(0.12)))
-                            }
-                        }
-                    }
-
-                    miniDivider
-
-                    // Funnel
-                    if config.freeTextFunnel {
-                        miniSection("Funnel") {
-                            TextField("Funnel name", text: Binding(get: { form.customFunnel }, set: { form.customFunnel = $0 }))
-                                .textFieldStyle(.plain)
-                                .font(.system(size: 12, weight: .medium))
-                                .padding(.horizontal, 8).padding(.vertical, 6)
-                                .background(RoundedRectangle(cornerRadius: DS.funRadius).fill(fun ? Color(white: 0.14) : Color.primary.opacity(0.05)))
-                                .overlay(RoundedRectangle(cornerRadius: DS.funRadius).strokeBorder(fun ? Color.white.opacity(0.12) : Color.primary.opacity(0.12)))
-                        }
-                    } else if !config.funnels.isEmpty {
-                        miniSection("Funnel") {
-                            MiniDropdown(
-                                options: config.funnels.map { MiniDropdownOption(label: $0, value: $0) },
-                                selection: Binding(
-                                    get: { form.useOtherFunnel ? "__other__" : form.funnel },
-                                    set: { val in
-                                        if val == "__other__" { form.useOtherFunnel = true; form.funnel = "" }
-                                        else { form.useOtherFunnel = false; form.funnel = val; form.customFunnel = "" }
-                                    }
-                                ),
-                                placeholder: "Select funnel...",
-                                customValue: form.useOtherFunnel ? Binding(get: { form.customFunnel }, set: { form.customFunnel = $0 }) : nil
-                            )
-                        }
-                    }
-
-                    // Additional Info
-                    miniSection("Info") {
-                        VStack(alignment: .leading, spacing: 3) {
-                            HStack(spacing: 4) {
-                                TextField("CI / SC / CT...", text: Binding(
-                                    get: { form.additionalInfo },
-                                    set: { form.additionalInfo = $0; form.validateAdditionalInfo() }
-                                ))
-                                .textFieldStyle(.plain)
-                                .font(.system(size: 12, weight: .medium))
-                                .padding(.horizontal, 8).padding(.vertical, 6)
-                                .background(RoundedRectangle(cornerRadius: DS.funRadius).fill(fun ? Color(white: 0.14) : Color.primary.opacity(0.05)))
-                                .overlay(RoundedRectangle(cornerRadius: DS.funRadius).strokeBorder(
-                                    form.additionalInfoError.isEmpty
-                                        ? (fun ? Color.white.opacity(0.12) : Color.primary.opacity(0.12))
-                                        : Color.red.opacity(0.4)
-                                ))
-                                Text("\(form.additionalInfo.count)/50")
-                                    .font(.system(size: 10, design: .monospaced))
-                                    .foregroundStyle(fun ? Color.white.opacity(0.3) : .secondary)
-                                    .fixedSize()
-                            }
-                            if !form.additionalInfoError.isEmpty {
-                                Text(form.additionalInfoError)
-                                    .font(.system(size: 10))
-                                    .foregroundStyle(.red)
-                            }
-                        }
-                    }
-
-                    // Date
-                    miniSection("Date") {
-                        VStack(alignment: .leading, spacing: 6) {
-                            HStack(spacing: 6) {
-                                miniDateButton("Today") { form.date = Date(); calViewDate = Date() }
-                                miniDateButton("Tomorrow") {
-                                    let d = Calendar.current.date(byAdding: .day, value: 1, to: Date()) ?? Date()
-                                    form.date = d; calViewDate = d
-                                }
-                                miniDateButton("+7 days") {
-                                    let d = Calendar.current.date(byAdding: .day, value: 7, to: Date()) ?? Date()
-                                    form.date = d; calViewDate = d
-                                }
-                                Spacer()
-                            }
-                            MiniCalendarView(
-                                selected: Binding(get: { form.date }, set: { form.date = $0 }),
-                                viewDate: $calViewDate
-                            )
-                        }
-                    }
-
-                    miniDivider
-
-                    // Creative Producer
-                    if config.creativeProducers.isEmpty {
-                        miniSection("Producer") {
-                            TextField("Initials (e.g. JD)", text: Binding(
-                                get: { form.customCreativeProducer },
-                                set: { form.customCreativeProducer = $0.uppercased() }
-                            ))
-                            .textFieldStyle(.plain)
-                            .font(.system(size: 12, weight: .bold, design: .monospaced))
-                            .padding(.horizontal, 8).padding(.vertical, 6)
-                            .background(RoundedRectangle(cornerRadius: DS.funRadius).fill(fun ? Color(white: 0.14) : Color.primary.opacity(0.05)))
-                            .overlay(RoundedRectangle(cornerRadius: DS.funRadius).strokeBorder(fun ? Color.white.opacity(0.12) : Color.primary.opacity(0.12)))
-                        }
-                    } else {
-                        miniSection("Producer") {
-                            MiniDropdown(
-                                options: config.creativeProducers.map { MiniDropdownOption(label: $0.label, value: $0.value) },
-                                selection: Binding(get: { form.creativeProducer }, set: { form.creativeProducer = $0 }),
-                                placeholder: "Select producer..."
-                            )
-                        }
-                    }
-
-                    // Resolution
-                    miniSection("Resolution") {
-                        MiniDropdown(
-                            options: config.resolutions.map { MiniDropdownOption(label: $0.label, value: $0.value) },
-                            selection: Binding(
-                                get: { form.useOtherResolution ? "__other__" : form.resolution },
-                                set: { val in
-                                    if val == "__other__" { form.useOtherResolution = true; form.resolution = "" }
-                                    else { form.useOtherResolution = false; form.resolution = val; form.customResolution = "" }
-                                }
-                            ),
-                            placeholder: "Select resolution...",
-                            customValue: form.useOtherResolution ? Binding(get: { form.customResolution }, set: { form.customResolution = $0 }) : nil,
-                            customPlaceholder: "e.g. 1920x1080"
-                        )
-                    }
-                }
-            }
-            .padding(.horizontal, 14).padding(.vertical, 10)
-
+            miniFormContent
             miniDivider
-
-            // Preview + Copy
-            VStack(spacing: 6) {
-                if form.generatedFilename.isEmpty {
-                    Text(fun ? "Pick a brand to start ✨" : "Select a brand to preview")
-                        .font(.system(size: 11, design: fun ? .rounded : .default))
-                        .foregroundStyle(.secondary)
-                        .frame(maxWidth: .infinity).padding(.vertical, 6)
-                } else {
-                    Text(form.generatedFilename)
-                        .font(.system(size: 11, weight: .medium, design: .monospaced))
-                        .foregroundStyle(fun ? .white.opacity(0.9) : .primary)
-                        .lineLimit(2)
-                        .textSelection(.enabled)
-                        .padding(8)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(RoundedRectangle(cornerRadius: DS.funRadius).fill(fun ? Color.white.opacity(0.05) : Color.primary.opacity(0.03)))
-                        .overlay(RoundedRectangle(cornerRadius: DS.funRadius).stroke(fun ? Color.white.opacity(0.06) : Color.primary.opacity(0.08)))
-                }
-
-                Button {
-                    if form.canCopy { historyStore.add(filename: form.generatedFilename, form: form) }
-                    form.copyToClipboard()
-                } label: {
-                    HStack(spacing: 5) {
-                        Image(systemName: fun ? "sparkles" : "doc.on.doc.fill")
-                            .font(.system(size: 11, weight: .semibold))
-                        Text(fun ? (form.canCopy ? "Snag it! ✨" : "Almost...") : (form.canCopy ? "Copy" : "Fill fields"))
-                            .font(.system(size: 12, weight: .bold, design: fun ? .rounded : .default))
-                    }
-                    .foregroundStyle(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 9)
-                    .background {
-                        if fun {
-                            KeyCapShape(topColors: form.canCopy ? FunColors.copyGradient : FunColors.keycapTop,
-                                        shadowColor: form.canCopy ? FunColors.copyShadow : FunColors.keycapShadow,
-                                        isPressed: copyPressing, cornerRadius: DS.funRadius, depth: 4)
-                        } else {
-                            RoundedRectangle(cornerRadius: DS.radius)
-                                .fill(form.canCopy ? Color.accentColor : Color.secondary.opacity(0.25))
-                        }
-                    }
-                    .offset(y: fun ? (copyPressing ? 3 : 0) : 0)
-                    .shadow(color: fun && form.canCopy ? .green.opacity(0.3) : .clear, radius: 6, y: 3)
-                }
-                .buttonStyle(.plain)
-                .disabled(!form.canCopy && !fun)
-                .simultaneousGesture(
-                    DragGesture(minimumDistance: 0)
-                        .onChanged { _ in withAnimation(.easeOut(duration: 0.06)) { copyPressing = true } }
-                        .onEnded   { _ in withAnimation(.spring(response: 0.22, dampingFraction: 0.45)) { copyPressing = false } }
-                )
-            }
-            .padding(.horizontal, 14).padding(.top, 10).padding(.bottom, 16)
+            miniFooter
         }
         .frame(width: 340)
         .background(fun ? Color(red: 0.10, green: 0.08, blue: 0.16) : Color(.windowBackgroundColor))
@@ -354,10 +28,263 @@ struct MiniPopoverView: View {
                     .animation(.spring(response: 0.4, dampingFraction: 0.65), value: form.showCopiedToast)
             }
         }
-        // Tap empty area to resign text field focus
-        .onTapGesture {
-            NSApp.keyWindow?.makeFirstResponder(nil)
+        .allowsHitTesting(true)
+    }
+
+    // MARK: - Form content (dropdowns for everything except variation)
+
+    private var miniFormContent: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            // Brand
+            miniSection("Brand") {
+                Menu {
+                    ForEach(Brand.allCases) { b in
+                        Button("\(b.rawValue) (\(b.config.abbreviation))") { form.brand = b; form.onBrandChange() }
+                    }
+                } label: {
+                    styledMenuLabel(form.brand?.rawValue ?? "", placeholder: "Select brand...")
+                }
+                .menuStyle(.borderlessButton).menuIndicator(.hidden)
+            }
+
+            // Type — pills
+            miniSection("Type") {
+                HStack(spacing: 6) {
+                    miniTypePill("vid", selected: form.typeLabel == .vid) { form.typeLabel = .vid }
+                    miniTypePill("img", selected: form.typeLabel == .img) { form.typeLabel = .img }
+                }
+            }
+
+            // Task # + Variation pills side by side
+            HStack(spacing: 10) {
+                VStack(alignment: .leading, spacing: 4) {
+                    miniLabel("Task #")
+                    TextField("123", text: Binding(
+                        get: { form.taskNumber },
+                        set: { form.taskNumber = $0; form.validateTaskNumber() }
+                    ))
+                    .textFieldStyle(.plain)
+                    .font(.system(size: 14, weight: .bold, design: .monospaced))
+                    .padding(.horizontal, 10).padding(.vertical, 9)
+                    .background(RoundedRectangle(cornerRadius: DS.funRadius).fill(fun ? Color(white: 0.14) : Color.primary.opacity(0.05)))
+                    .overlay(RoundedRectangle(cornerRadius: DS.funRadius).strokeBorder(fun ? Color.white.opacity(0.12) : Color.primary.opacity(0.12)))
+                }
+
+                MiniVariationSection(form: form, fun: fun)
+            }
+
+            // Brand-dependent sections
+            if let brand = form.brand {
+                let config = brand.config
+                miniDivider
+
+                // Platform
+                miniSection("Platform") {
+                    Menu {
+                        ForEach(Platform.allCases) { p in
+                            Button(p.rawValue) { form.platform = p }
+                        }
+                    } label: {
+                        styledMenuLabel(form.platform?.rawValue ?? "", placeholder: "Select platform...")
+                    }
+                    .menuStyle(.borderlessButton).menuIndicator(.hidden)
+                }
+
+                // Language
+                miniSection("Language") {
+                    Menu {
+                        ForEach(Language.allCases) { lang in
+                            Button("\(lang.flag) \(lang.rawValue)") { form.language = lang.rawValue; form.useOtherLanguage = false }
+                        }
+                    } label: {
+                        styledMenuLabel(
+                            form.language.isEmpty ? "" : "\(Language.allCases.first { $0.rawValue == form.language }?.flag ?? "") \(form.language)",
+                            placeholder: "Select language..."
+                        )
+                    }
+                    .menuStyle(.borderlessButton).menuIndicator(.hidden)
+                }
+
+                miniDivider
+
+                // Funnel
+                if config.freeTextFunnel {
+                    miniSection("Funnel") {
+                        TextField("Funnel name", text: Binding(get: { form.customFunnel }, set: { form.customFunnel = $0 }))
+                            .textFieldStyle(.plain).font(.system(size: 12, weight: .medium))
+                            .padding(.horizontal, 8).padding(.vertical, 6)
+                            .background(RoundedRectangle(cornerRadius: DS.funRadius).fill(fun ? Color(white: 0.14) : Color.primary.opacity(0.05)))
+                            .overlay(RoundedRectangle(cornerRadius: DS.funRadius).strokeBorder(fun ? Color.white.opacity(0.12) : Color.primary.opacity(0.12)))
+                    }
+                } else if !config.funnels.isEmpty {
+                    miniSection("Funnel") {
+                        Menu {
+                            ForEach(config.funnels, id: \.self) { f in
+                                Button(f) { form.funnel = f; form.useOtherFunnel = false; form.customFunnel = "" }
+                            }
+                        } label: {
+                            styledMenuLabel(form.funnel, placeholder: "Select funnel...")
+                        }
+                        .menuStyle(.borderlessButton).menuIndicator(.hidden)
+                    }
+                }
+
+                // Additional Info
+                miniSection("Info") {
+                    HStack(spacing: 4) {
+                        TextField("CI / SC / CT...", text: Binding(
+                            get: { form.additionalInfo },
+                            set: { form.additionalInfo = $0; form.validateAdditionalInfo() }
+                        ))
+                        .textFieldStyle(.plain).font(.system(size: 12, weight: .medium))
+                        .padding(.horizontal, 8).padding(.vertical, 6)
+                        .background(RoundedRectangle(cornerRadius: DS.funRadius).fill(fun ? Color(white: 0.14) : Color.primary.opacity(0.05)))
+                        .overlay(RoundedRectangle(cornerRadius: DS.funRadius).strokeBorder(
+                            form.additionalInfoError.isEmpty ? (fun ? Color.white.opacity(0.12) : Color.primary.opacity(0.12)) : Color.red.opacity(0.4)
+                        ))
+                        Text("\(form.additionalInfo.count)/50")
+                            .font(.system(size: 10, design: .monospaced))
+                            .foregroundStyle(fun ? Color.white.opacity(0.3) : .secondary).fixedSize()
+                    }
+                }
+
+                // Date
+                miniSection("Date") {
+                    VStack(alignment: .leading, spacing: 6) {
+                        HStack(spacing: 6) {
+                            miniDateButton("Today") { form.date = Date(); calViewDate = Date() }
+                            miniDateButton("Tomorrow") {
+                                let d = Calendar.current.date(byAdding: .day, value: 1, to: Date()) ?? Date()
+                                form.date = d; calViewDate = d
+                            }
+                            miniDateButton("+7 days") {
+                                let d = Calendar.current.date(byAdding: .day, value: 7, to: Date()) ?? Date()
+                                form.date = d; calViewDate = d
+                            }
+                            Spacer()
+                        }
+                        MiniCalendarView(
+                            selected: Binding(get: { form.date }, set: { form.date = $0 }),
+                            viewDate: $calViewDate
+                        )
+                    }
+                }
+
+                miniDivider
+
+                // Creative Producer
+                if config.creativeProducers.isEmpty {
+                    miniSection("Producer") {
+                        TextField("Initials (e.g. JD)", text: Binding(
+                            get: { form.customCreativeProducer },
+                            set: { form.customCreativeProducer = $0.uppercased() }
+                        ))
+                        .textFieldStyle(.plain).font(.system(size: 12, weight: .bold, design: .monospaced))
+                        .padding(.horizontal, 8).padding(.vertical, 6)
+                        .background(RoundedRectangle(cornerRadius: DS.funRadius).fill(fun ? Color(white: 0.14) : Color.primary.opacity(0.05)))
+                        .overlay(RoundedRectangle(cornerRadius: DS.funRadius).strokeBorder(fun ? Color.white.opacity(0.12) : Color.primary.opacity(0.12)))
+                    }
+                } else {
+                    miniSection("Producer") {
+                        Menu {
+                            ForEach(config.creativeProducers) { p in
+                                Button(p.label) { form.creativeProducer = p.value }
+                            }
+                        } label: {
+                            let label = config.creativeProducers.first { $0.value == form.creativeProducer }?.label ?? ""
+                            styledMenuLabel(label, placeholder: "Select producer...")
+                        }
+                        .menuStyle(.borderlessButton).menuIndicator(.hidden)
+                    }
+                }
+
+                // Resolution
+                miniSection("Resolution") {
+                    Menu {
+                        ForEach(config.resolutions) { r in
+                            Button(r.label) { form.resolution = r.value; form.useOtherResolution = false; form.customResolution = "" }
+                        }
+                    } label: {
+                        let label = config.resolutions.first { $0.value == form.resolution }?.label ?? ""
+                        styledMenuLabel(label, placeholder: "Select resolution...")
+                    }
+                    .menuStyle(.borderlessButton).menuIndicator(.hidden)
+                }
+            }
         }
+        .padding(.horizontal, 14).padding(.vertical, 10)
+    }
+
+    // MARK: - Header
+
+    private var miniHeader: some View {
+        HStack(spacing: 6) {
+            if fun { Text("✨").font(.system(size: 11)) }
+            Text("NameCraft")
+                .font(.system(size: 12, weight: .bold, design: fun ? .rounded : .default))
+            Spacer()
+            modeToggleButton
+            expandButton
+        }
+        .padding(.horizontal, 14).padding(.top, 12).padding(.bottom, 8)
+    }
+
+    // MARK: - Footer (preview + copy)
+
+    private var miniFooter: some View {
+        VStack(spacing: 6) {
+            if form.generatedFilename.isEmpty {
+                Text(fun ? "Pick a brand to start ✨" : "Select a brand to preview")
+                    .font(.system(size: 11, design: fun ? .rounded : .default))
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity).padding(.vertical, 6)
+            } else {
+                Text(form.generatedFilename)
+                    .font(.system(size: 11, weight: .medium, design: .monospaced))
+                    .foregroundStyle(fun ? .white.opacity(0.9) : .primary)
+                    .lineLimit(2)
+                    .textSelection(.enabled)
+                    .padding(8)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(RoundedRectangle(cornerRadius: DS.funRadius).fill(fun ? Color.white.opacity(0.05) : Color.primary.opacity(0.03)))
+                    .overlay(RoundedRectangle(cornerRadius: DS.funRadius).stroke(fun ? Color.white.opacity(0.06) : Color.primary.opacity(0.08)))
+            }
+
+            Button {
+                if form.canCopy { historyStore.add(filename: form.generatedFilename, form: form) }
+                form.copyToClipboard()
+            } label: {
+                HStack(spacing: 5) {
+                    Image(systemName: fun ? "sparkles" : "doc.on.doc.fill")
+                        .font(.system(size: 11, weight: .semibold))
+                    Text(fun ? (form.canCopy ? "Snag it! ✨" : "Almost...") : (form.canCopy ? "Copy" : "Fill fields"))
+                        .font(.system(size: 12, weight: .bold, design: fun ? .rounded : .default))
+                }
+                .foregroundStyle(.white)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 9)
+                .background {
+                    if fun {
+                        KeyCapShape(topColors: form.canCopy ? FunColors.copyGradient : FunColors.keycapTop,
+                                    shadowColor: form.canCopy ? FunColors.copyShadow : FunColors.keycapShadow,
+                                    isPressed: copyPressing, cornerRadius: DS.funRadius, depth: 4)
+                    } else {
+                        RoundedRectangle(cornerRadius: DS.radius)
+                            .fill(form.canCopy ? Color.accentColor : Color.secondary.opacity(0.25))
+                    }
+                }
+                .offset(y: fun ? (copyPressing ? 3 : 0) : 0)
+                .shadow(color: fun && form.canCopy ? .green.opacity(0.3) : .clear, radius: 6, y: 3)
+            }
+            .buttonStyle(.plain)
+            .disabled(!form.canCopy && !fun)
+            .simultaneousGesture(
+                DragGesture(minimumDistance: 0)
+                    .onChanged { _ in withAnimation(.easeOut(duration: 0.06)) { copyPressing = true } }
+                    .onEnded   { _ in withAnimation(.spring(response: 0.22, dampingFraction: 0.45)) { copyPressing = false } }
+            )
+        }
+        .padding(.horizontal, 14).padding(.top, 10).padding(.bottom, 16)
     }
 
     // MARK: - Header buttons
@@ -443,6 +370,33 @@ struct MiniPopoverView: View {
         MiniPillButton(text: text, icon: nil, selected: selected, colors: colors, action: action)
     }
 
+    private func styledMenuLabel(_ value: String, placeholder: String) -> some View {
+        HStack(spacing: 6) {
+            Text(value.isEmpty ? placeholder : value)
+                .font(.system(size: 13, weight: .medium, design: fun ? .rounded : .default))
+                .foregroundStyle(value.isEmpty ? Color.secondary : (fun ? Color.white : Color.primary))
+            Spacer()
+            Image(systemName: "chevron.up.chevron.down")
+                .font(.system(size: 9, weight: .semibold))
+                .foregroundStyle(fun ? .white.opacity(0.4) : .secondary)
+        }
+        .padding(.horizontal, 10).padding(.vertical, 9)
+        .background(RoundedRectangle(cornerRadius: DS.funRadius).fill(fun ? Color(white: 0.12) : Color.white.opacity(0.05)))
+        .overlay(RoundedRectangle(cornerRadius: DS.funRadius).stroke(fun ? Color.white.opacity(0.1) : Color.white.opacity(0.12)))
+    }
+
+    private func miniTypePill(_ text: String, selected: Bool, action: @escaping () -> Void) -> some View {
+        Button { withAnimation(.easeInOut(duration: 0.2)) { action() } } label: {
+            Text(text)
+                .font(.system(size: 14, weight: selected ? .bold : .medium, design: fun ? .rounded : .default))
+                .foregroundStyle(selected ? (fun ? .white : Color.black) : (fun ? .white : Color.white))
+                .frame(maxWidth: .infinity).padding(.vertical, 10)
+                .background(RoundedRectangle(cornerRadius: DS.funRadius).fill(selected ? Color.white : Color.white.opacity(0.05)))
+                .overlay(RoundedRectangle(cornerRadius: DS.funRadius).stroke(selected ? Color.clear : Color.white.opacity(0.12)))
+        }
+        .buttonStyle(.plain)
+    }
+
     private func miniDateButton(_ label: String, action: @escaping () -> Void) -> some View {
         Button {
             withAnimation(.easeInOut(duration: 0.2)) { action() }
@@ -458,6 +412,45 @@ struct MiniPopoverView: View {
     }
 }
 
+// MARK: - Mini variation pill
+
+private struct MiniVariationPill: View {
+    let label: String
+    let isSelected: Bool
+    let fun: Bool
+    let action: () -> Void
+    @State private var pressing = false
+
+    var body: some View {
+        Button(action: action) {
+            Text(label)
+                .font(.system(size: 12, weight: .bold, design: fun ? .rounded : .monospaced))
+                .foregroundStyle(isSelected ? (fun ? .white : Color.black) : (fun ? .white : Color.white))
+                .frame(width: 30, height: 30)
+                .background {
+                    if isSelected {
+                        RoundedRectangle(cornerRadius: DS.funRadius)
+                            .fill(fun
+                                  ? AnyShapeStyle(LinearGradient(colors: [Color.purple, Color.purple.opacity(0.7)], startPoint: .top, endPoint: .bottom))
+                                  : AnyShapeStyle(Color.white))
+                    } else {
+                        RoundedRectangle(cornerRadius: DS.funRadius)
+                            .fill(fun ? Color(white: 0.14) : Color.white.opacity(0.05))
+                    }
+                }
+                .overlay(RoundedRectangle(cornerRadius: DS.funRadius)
+                    .strokeBorder(isSelected ? Color.clear : (fun ? Color.white.opacity(0.1) : Color.white.opacity(0.12)), lineWidth: 1))
+                .scaleEffect(pressing ? 0.88 : 1)
+                .animation(.spring(response: 0.18, dampingFraction: 0.6), value: pressing)
+        }
+        .buttonStyle(.plain)
+        .simultaneousGesture(DragGesture(minimumDistance: 0)
+            .onChanged { _ in pressing = true }
+            .onEnded   { _ in pressing = false }
+        )
+    }
+}
+
 // MARK: - Mini brand chip
 
 private struct MiniBrandChip: View {
@@ -470,15 +463,20 @@ private struct MiniBrandChip: View {
 
     var body: some View {
         Button(action: action) {
-            VStack(spacing: 3) {
-                Image(systemName: brand.icon)
-                    .font(.system(size: 15, weight: .medium))
-                    .symbolEffect(.bounce, value: isSelected)
+            VStack(spacing: 4) {
+                ZStack {
+                    Circle()
+                        .fill(fun ? Color.white.opacity(isSelected ? 0.22 : 0.1) : (isSelected ? Color.black.opacity(0.15) : Color.white.opacity(0.07)))
+                        .frame(width: 32, height: 32)
+                    Image(systemName: brand.icon)
+                        .font(.system(size: 13, weight: .medium))
+                        .symbolEffect(.bounce, value: isSelected)
+                }
                 Text(brand.config.abbreviation)
-                    .font(.system(size: 12, weight: isSelected ? .black : .bold, design: fun ? .rounded : .default))
+                    .font(.system(size: 11, weight: isSelected ? .black : .bold, design: fun ? .rounded : .default))
                     .lineLimit(1).minimumScaleFactor(0.7)
             }
-            .foregroundStyle(fun ? .white : (isSelected ? Color(.windowBackgroundColor) : .primary))
+            .foregroundStyle(fun ? .white : (isSelected ? Color.black : .white))
             .frame(maxWidth: .infinity)
             .padding(.vertical, 11)
             .background {
@@ -490,13 +488,13 @@ private struct MiniBrandChip: View {
                     )
                 } else {
                     RoundedRectangle(cornerRadius: DS.funRadius)
-                        .fill(isSelected ? Color.primary : Color.primary.opacity(hovering ? 0.1 : (pressing ? 0.07 : 0.05)))
+                        .fill(isSelected ? Color.white : Color.white.opacity(hovering ? 0.1 : (pressing ? 0.07 : 0.05)))
                 }
             }
             .overlay {
                 if !fun && !isSelected {
                     RoundedRectangle(cornerRadius: DS.funRadius)
-                        .stroke(Color.primary.opacity(hovering ? 0.2 : 0.12), lineWidth: hovering ? 1.5 : 1)
+                        .stroke(Color.white.opacity(hovering ? 0.2 : 0.12), lineWidth: hovering ? 1.5 : 1)
                 }
             }
             .scaleEffect(hovering && !pressing ? (fun ? 1.06 : 1.02) : (pressing ? 0.95 : 1.0))
@@ -538,7 +536,7 @@ private struct MiniPillButton: View {
                     .font(.system(size: 14, weight: selected ? .bold : .medium, design: fun ? .rounded : .default))
                     .lineLimit(1).minimumScaleFactor(0.75)
             }
-            .foregroundStyle(fun ? .white : (selected ? Color(.windowBackgroundColor) : .primary))
+            .foregroundStyle(fun ? .white : (selected ? Color.black : .primary))
             .frame(maxWidth: .infinity)
             .padding(.vertical, 10)
             .background {
@@ -550,13 +548,13 @@ private struct MiniPillButton: View {
                     )
                 } else {
                     RoundedRectangle(cornerRadius: DS.funRadius)
-                        .fill(selected ? Color.primary : Color.primary.opacity(hovering ? 0.1 : 0.05))
+                        .fill(selected ? Color.white : Color.white.opacity(hovering ? 0.1 : 0.05))
                 }
             }
             .overlay {
                 if !fun && !selected {
                     RoundedRectangle(cornerRadius: DS.funRadius)
-                        .stroke(Color.primary.opacity(hovering ? 0.2 : 0.12), lineWidth: hovering ? 1.5 : 1)
+                        .stroke(Color.white.opacity(hovering ? 0.2 : 0.12), lineWidth: hovering ? 1.5 : 1)
                 }
             }
             .scaleEffect(fun ? (hovering && !pressing ? 1.04 : 1.0) : (hovering && !pressing ? 1.02 : (pressing ? 0.96 : 1.0)))
@@ -715,6 +713,7 @@ private struct MiniDropdown: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
+            // Trigger button with floating overlay menu
             Button { withAnimation(.spring(response: 0.25, dampingFraction: 0.75)) { isOpen.toggle() } } label: {
                 HStack(spacing: 6) {
                     Text(isOther ? "Other..." : (selection.isEmpty ? placeholder : selectedLabel))
@@ -735,24 +734,28 @@ private struct MiniDropdown: View {
                 ))
             }
             .buttonStyle(.plain)
-
-            if isOpen {
-                VStack(spacing: 1) {
-                    ForEach(options) { opt in
-                        optionRow(label: opt.label, value: opt.value)
+            .overlay(alignment: .topLeading) {
+                if isOpen {
+                    VStack(spacing: 1) {
+                        ForEach(options) { opt in
+                            optionRow(label: opt.label, value: opt.value)
+                        }
+                        Divider().padding(.horizontal, 6).padding(.vertical, 2).opacity(0.35)
+                        optionRow(label: "Other...", value: "__other__", dimmed: true)
                     }
-                    Divider().padding(.horizontal, 6).padding(.vertical, 2).opacity(0.35)
-                    optionRow(label: "Other...", value: "__other__", dimmed: true)
+                    .padding(4)
+                    .frame(maxWidth: .infinity)
+                    .background(RoundedRectangle(cornerRadius: DS.funRadius + 2).fill(fun ? Color(white: 0.10) : Color(.windowBackgroundColor)))
+                    .overlay(RoundedRectangle(cornerRadius: DS.funRadius + 2).stroke(fun ? Color.white.opacity(0.08) : Color.primary.opacity(0.1)))
+                    .shadow(color: .black.opacity(fun ? 0.5 : 0.25), radius: 12, y: 4)
+                    .offset(y: 38)
+                    .transition(.asymmetric(
+                        insertion: .scale(scale: 0.96, anchor: .top).combined(with: .opacity),
+                        removal: .scale(scale: 0.96, anchor: .top).combined(with: .opacity)
+                    ))
                 }
-                .padding(4)
-                .background(RoundedRectangle(cornerRadius: DS.funRadius + 2).fill(fun ? Color(white: 0.10) : Color(.windowBackgroundColor)))
-                .overlay(RoundedRectangle(cornerRadius: DS.funRadius + 2).stroke(fun ? Color.white.opacity(0.08) : Color.primary.opacity(0.1)))
-                .shadow(color: .black.opacity(fun ? 0.4 : 0.15), radius: 10, y: 4)
-                .transition(.asymmetric(
-                    insertion: .scale(scale: 0.96, anchor: .top).combined(with: .opacity),
-                    removal: .scale(scale: 0.96, anchor: .top).combined(with: .opacity)
-                ))
             }
+            .zIndex(isOpen ? 100 : 0)
 
             if isOther, let cv = customValue {
                 TextField(customPlaceholder, text: cv)
@@ -788,5 +791,89 @@ private struct MiniDropdown: View {
             .cornerRadius(8)
         }
         .buttonStyle(.plain)
+    }
+}
+
+// MARK: - Mini variation section
+
+private struct MiniVariationSection: View {
+    var form: FormState
+    let fun: Bool
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text("VARIATION")
+                .font(.system(size: 10, weight: .semibold, design: fun ? .rounded : .default))
+                .foregroundStyle(fun ? Color.white.opacity(0.4) : Color.secondary)
+                .tracking(0.5)
+            HStack(spacing: 4) {
+                ForEach([1, 2, 3, 4, 5], id: \.self) { n in
+                    MiniVariationPill(
+                        label: "\(n)",
+                        isSelected: !form.useOtherVariation && form.variation == n,
+                        fun: fun
+                    ) {
+                        withAnimation(.spring(response: 0.22, dampingFraction: 0.7)) {
+                            form.variation = n
+                            form.useOtherVariation = false
+                            form.customVariation = ""
+                        }
+                    }
+                }
+                if form.useOtherVariation {
+                    TextField("#", text: Binding(
+                        get: { form.customVariation },
+                        set: { form.customVariation = $0.filter { $0.isNumber } }
+                    ))
+                    .textFieldStyle(.plain)
+                    .font(.system(size: 12, weight: .bold, design: .monospaced))
+                    .multilineTextAlignment(.center)
+                    .frame(width: 36, height: 30)
+                    .background(RoundedRectangle(cornerRadius: DS.funRadius)
+                        .fill(fun ? Color.purple.opacity(0.2) : Color.white.opacity(0.06)))
+                    .overlay(RoundedRectangle(cornerRadius: DS.funRadius)
+                        .strokeBorder(fun ? Color.purple.opacity(0.6) : Color.white.opacity(0.3), lineWidth: 1.5))
+                } else {
+                    MiniVariationPill(label: "…", isSelected: false, fun: fun) {
+                        withAnimation(.spring(response: 0.22, dampingFraction: 0.7)) {
+                            form.useOtherVariation = true
+                            form.customVariation = ""
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Extracted grids (reduce body complexity for type-checker)
+
+private struct MiniBrandGrid: View {
+    var form: FormState
+    var body: some View {
+        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 6), count: 4), spacing: 6) {
+            ForEach(Brand.allCases) { brand in
+                MiniBrandChip(brand: brand, isSelected: form.brand == brand) {
+                    if form.brand != brand {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            form.brand = brand; form.onBrandChange()
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+private struct MiniPlatformGrid: View {
+    var form: FormState
+    @Environment(\.funMode) private var fun
+    var body: some View {
+        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 6), count: 4), spacing: 6) {
+            ForEach(Platform.allCases) { p in
+                MiniPillButton(text: p.rawValue, selected: form.platform == p, colors: FunColors.platformGradient(p)) {
+                    withAnimation(.easeInOut(duration: 0.2)) { form.platform = p }
+                }
+            }
+        }
     }
 }

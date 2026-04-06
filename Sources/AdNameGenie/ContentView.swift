@@ -385,8 +385,7 @@ struct BrandCard: View {
                     }
                     .foregroundStyle(fun ? .white : (isSelected ? Color(.windowBackgroundColor) : .primary))
                 }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 22)
+                .frame(maxWidth: .infinity, minHeight: 120)
                 .padding(.horizontal, 8)
                 .background {
                     if fun {
@@ -559,7 +558,7 @@ struct OtherFieldCard: View {
                     }.buttonStyle(.plain)
                 }
                 .padding(.horizontal, 16)
-                .padding(.vertical, 13)
+                .padding(.vertical, 18)
                 .background(RoundedRectangle(cornerRadius: fun ? DS.funRadius : DS.radius).fill(fun ? Color(white: 0.16) : Color.primary.opacity(0.04)))
                 .overlay(RoundedRectangle(cornerRadius: fun ? DS.funRadius : DS.radius).strokeBorder(fun ? Color.yellow.opacity(0.4) : Color.primary.opacity(0.18), lineWidth: fun ? 2 : 1.5))
                 .onAppear { DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { focused = true } }

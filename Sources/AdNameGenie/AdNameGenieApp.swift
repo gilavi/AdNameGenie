@@ -6,11 +6,19 @@ final class AppUpdater: ObservableObject {
     let updaterController: SPUStandardUpdaterController
 
     init() {
+        #if DEBUG
+        updaterController = SPUStandardUpdaterController(
+            startingUpdater: false,
+            updaterDelegate: nil,
+            userDriverDelegate: nil
+        )
+        #else
         updaterController = SPUStandardUpdaterController(
             startingUpdater: true,
             updaterDelegate: nil,
             userDriverDelegate: nil
         )
+        #endif
     }
 
     func checkForUpdates() {
